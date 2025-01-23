@@ -294,7 +294,12 @@
           <dt><dfn>oncapturedzoomlevelchange</dfn></dt>
           <dd>
             <p>
-              The user agent MUST fire a blank event on this {{EventHandler}} whenever [=this=].<a
+              An [=event handler IDL attribute=] whose [=event handler event type=] is
+              `capturedzoomlevelchange`.
+            </p>
+            <p>
+              Given a {{CaptureController}} |controller|, the user agent MUST [=fire an event=]
+              named `capturedzoomlevelchange` at |controller| whenever |controller|.<a
                 data-cite="!screen-capture/#dfn-source"
                 >[[\Source]]</a
               >'s [=zoom level=] changes.
