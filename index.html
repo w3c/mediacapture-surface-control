@@ -138,7 +138,7 @@
             sequence&lt;long&gt; getSupportedZoomLevels();
             long getZoomLevel();
             Promise&lt;undefined&gt; setZoomLevel(long zoomLevel);
-            attribute EventHandler oncapturedzoomlevelchange;
+            attribute EventHandler onzoomlevelchange;
           };
         </pre>
         <dl data-link-for="CaptureController" data-dfn-for="CaptureController" class="methods">
@@ -291,7 +291,7 @@
               <li>Return |P|.</li>
             </ol>
           </dd>
-          <dt><dfn>oncapturedzoomlevelchange</dfn></dt>
+          <dt><dfn>onzoomlevelchange</dfn></dt>
           <dd>
             <p>
               An [=event handler IDL attribute=] whose [=event handler event type=] is
