@@ -78,8 +78,9 @@
       <div class="note">
         <p>
           The API surfaces introduced by this specification can be categorized as either read-access
-          or write-access. Note that only the write-access APIs ({{CaptureController/setZoomLevel}}
-          and {{CaptureController/forwardWheel}}) are gated by the <a>"captured-surface-control"</a>
+          or write-access. Note that only the write-access APIs ({{CaptureController/forwardWheel}},
+          {{CaptureController/increaseZoomLevel}}, {{CaptureController/decreaseZoomLevel}} and
+          {{CaptureController/resetZoomLevel}}) are gated by the <a>"captured-surface-control"</a>
           permissions policy.
         </p>
       </div>
@@ -121,9 +122,9 @@
         </p>
       </section>
       <section>
-        <h2>Permitted Event Types for setZoomLevel()</h2>
+        <h2>Permitted Event Types for zoom-setting</h2>
         <p>
-          We define the <dfn>permitted event types for setZoomLevel</dfn> as a set composed of the
+          We define the <dfn>permitted event types for zoom-setting</dfn> as a set composed of the
           following <a data-cite="DOM#dom-event-type">event types</a>:
         </p>
         <ul>
@@ -137,7 +138,9 @@
           partial interface CaptureController {
             sequence&lt;long&gt; getSupportedZoomLevels();
             long getZoomLevel();
-            Promise&lt;undefined&gt; setZoomLevel(long zoomLevel);
+            Promise&lt;undefined&gt; increaseZoomLevel();
+            Promise&lt;undefined&gt; decreaseZoomLevel();
+            Promise&lt;undefined&gt; resetZoomLevel();
             attribute EventHandler oncapturedzoomlevelchange;
           };
         </pre>
@@ -194,102 +197,38 @@
               </li>
             </ol>
           </dd>
-          <dt><dfn>setZoomLevel()</dfn></dt>
+          <dt><dfn>increaseZoomLevel()</dfn></dt>
           <dd>
             <p>
               This method allows applications to set the captured [=display surface=]'s [=zoom
-              level=].
+              level=] one step higher than its current value.
             </p>
-            <p>When invoked, the user agent MUST run the following steps:</p>
-            <ol>
-              <li>
-                If [=this=] is not [=actively capturing=], return a promise [=reject|rejected=] with
-                a {{DOMException}} object whose {{DOMException/name}} attribute has the value
-                {{InvalidStateError}}.
-              </li>
-              <li>
-                If [=this=] [=is self-capturing=], return a promise [=reject|rejected=] with a
-                {{DOMException}} object whose {{DOMException/name}} attribute has the value
-                {{InvalidStateError}}.
-              </li>
-              <li>
-                Let |surfaceType| be [=this=].<a data-cite="!screen-capture/#dfn-displaysurfacetype"
-                  >[[\DisplaySurfaceType]]</a
-                >.
-              </li>
-              <li>
-                If |surfaceType| is not a [=supported display surface type=], return a promise
-                [=reject|rejected=] with a {{DOMException}} object whose {{DOMException/name}}
-                attribute has the value {{NotSupportedError}}.
-              </li>
-              <li>
-                <p>
-                  Ensure that the code is running from within the context of an event handler which
-                  was triggered by the browser agent firing a trusted event, triggered by the user
-                  interacting with the user agent. To do so, run the following steps:
-                </p>
-                <ol>
-                  <li>Let |currentEvent:Event| be {{Window}}.{{Window/event}}.</li>
-                  <li>
-                    If |currentEvent| is {{undefined}}, return a promise [=reject|rejected=] with a
-                    {{DOMException}} object whose {{DOMException/name}} attribute has the value
-                    {{InvalidStateError}}.
-                  </li>
-                  <li>
-                    If |currentEvent|.{{Event/isTrusted}} is <code>false</code>, return a promise
-                    [=reject|rejected=] with a {{DOMException}} object whose {{DOMException/name}}
-                    attribute has the value {{InvalidStateError}}.
-                  </li>
-                  <li>
-                    If |currentEvent|.{{Event/type}} is not in
-                    <a>permitted event types for setZoomLevel</a>, return a promise
-                    [=reject|rejected=] with a {{DOMException}} object whose {{DOMException/name}}
-                    attribute has the value {{InvalidStateError}}.
-                    <div class="note">
-                      <p>
-                        It follows from these steps that {{CaptureController/setZoomLevel()}} is
-                        only callable with [=transient activation=], because
-                        <a>permitted event types for setZoomLevel</a>
-                        only contains <a data-cite="DOM#dom-event-type">event types</a> that confer
-                        this activation.
-                      </p>
-                      <p>
-                        In fact, our API shape implies a stronger guarantee - whereas [=transient
-                        activation=] persists for several seconds after the user action, the API
-                        shape here limits {{CaptureController/setZoomLevel()}} to being called
-                        immediately following the user's action.
-                      </p>
-                    </div>
-                  </li>
-                </ol>
-              </li>
-              <li>Let |targetZoomLevel| be the method's first argument.</li>
-              <li>
-                If |targetZoomLevel| is not included in the user agent's set of [=supported zoom
-                levels=] for |surfaceType|, return a promise [=reject|rejected=] with a
-                {{DOMException}} object whose {{DOMException/name}} attribute has the value
-                {{InvalidStateError}}.
-              </li>
-              <li>Let |P| be a new {{Promise}}.</li>
-              <li>
-                <p>Run the following steps [=in parallel=]:</p>
-                <ol>
-                  <li>
-                    [=Request permission to use=] a {{PermissionDescriptor}} with its
-                    {{PermissionDescriptor/name}} member set to
-                    <a>"captured-surface-control"</a>. If the result of the request is
-                    {{PermissionState/"denied"}}, [=reject=] |P| with a new {{DOMException}} object
-                    whose {{DOMException/name}} is {{NotAllowedError}} and abort these steps.
-                  </li>
-                  <li>
-                    Set [=this=].<a data-cite="!screen-capture/#dfn-source">[[\Source]]</a>'s [=zoom
-                    level=] to |targetZoomLevel|.
-                  </li>
-                  <li>[=Resolve=] |P|.</li>
-                </ol>
-              </li>
-              <li>Return |P|.</li>
-            </ol>
+            <p>
+              When this method is invoked, the user agent MUST run the [=set zoom level algorithm=]
+              and return its result.
+            </p>
+          </dd>
+          <dt><dfn>decreaseZoomLevel()</dfn></dt>
+          <dd>
+            <p>
+              This method allows applications to set the captured [=display surface=]'s [=zoom
+              level=] one step lower than its current value.
+            </p>
+            <p>
+              When this method is invoked, the user agent MUST run the [=set zoom level algorithm=]
+              and return its result.
+            </p>
+          </dd>
+          <dt><dfn>resetZoomLevel()</dfn></dt>
+          <dd>
+            <p>
+              This method allows applications to set the captured [=display surface=]'s [=zoom
+              level=] to 100.
+            </p>
+            <p>
+              When this method is invoked, the user agent MUST run the [=set zoom level algorithm=]
+              and return its result.
+            </p>
           </dd>
           <dt><dfn>oncapturedzoomlevelchange</dfn></dt>
           <dd>
@@ -306,7 +245,7 @@
                   The user interacted with the user agent to change the zoom level of a captured
                   tab.
                 </li>
-                <li>The capturing application called {{CaptureController/setZoomLevel()}}.</li>
+                <li>The capturing application called {{CaptureController/increaseZoomLevel()}}.</li>
                 <li>
                   The user changed the shared [=display surface=], choosing one which has a
                   different [=zoom level=].
@@ -510,6 +449,129 @@
         </div>
       </section>
       <section>
+        <h2>Subroutine: Setting the zoom level</h2>
+        <p>
+          The <dfn>set zoom level algorithm</dfn> a |controller:CaptureController| of type
+          {{CaptureController}} and a |zoomAction:long| of type {{long}} as arguments. When invoked,
+          the user agent MUST run the following steps:
+        </p>
+        <ol>
+          <li>
+            If [=this=] is not [=actively capturing=], return a promise [=reject|rejected=] with a
+            {{DOMException}} object whose {{DOMException/name}} attribute has the value
+            {{InvalidStateError}}.
+          </li>
+          <li>
+            If [=this=] [=is self-capturing=], return a promise [=reject|rejected=] with a
+            {{DOMException}} object whose {{DOMException/name}} attribute has the value
+            {{InvalidStateError}}.
+          </li>
+          <li>
+            Let |surfaceType| be [=this=].<a data-cite="!screen-capture/#dfn-displaysurfacetype"
+              >[[\DisplaySurfaceType]]</a
+            >.
+          </li>
+          <li>
+            If |surfaceType| is not a [=supported display surface type=], return a promise
+            [=reject|rejected=] with a {{DOMException}} object whose {{DOMException/name}} attribute
+            has the value {{NotSupportedError}}.
+          </li>
+          <li>
+            <p>
+              Ensure that the code is running from within the context of an event handler which was
+              triggered by the browser agent firing a trusted event, triggered by the user
+              interacting with the user agent. To do so, run the following steps:
+            </p>
+            <ol>
+              <li>Let |currentEvent:Event| be {{Window}}.{{Window/event}}.</li>
+              <li>
+                If |currentEvent| is {{undefined}}, return a promise [=reject|rejected=] with a
+                {{DOMException}} object whose {{DOMException/name}} attribute has the value
+                {{InvalidStateError}}.
+              </li>
+              <li>
+                If |currentEvent|.{{Event/isTrusted}} is <code>false</code>, return a promise
+                [=reject|rejected=] with a {{DOMException}} object whose {{DOMException/name}}
+                attribute has the value {{InvalidStateError}}.
+              </li>
+              <li>
+                If |currentEvent|.{{Event/type}} is not in
+                <a>permitted event types for zoom-setting</a>, return a promise [=reject|rejected=]
+                with a {{DOMException}} object whose {{DOMException/name}} attribute has the value
+                {{InvalidStateError}}.
+                <div class="note">
+                  <p>
+                    It follows from these steps that {{CaptureController/increaseZoomLevel()}},
+                    {{CaptureController/decreaseZoomLevel()}} and
+                    {{CaptureController/resetZoomLevel()}} are only callable with [=transient
+                    activation=], because [=permitted event types for zoom-setting=] only contains
+                    <a data-cite="DOM#dom-event-type">event types</a> that confer this activation.
+                  </p>
+                  <p>
+                    In fact, our API shape implies a stronger guarantee - whereas [=transient
+                    activation=] persists for several seconds after the user action, the API shape
+                    here limits zoom-setting to immediately after the user's action.
+                  </p>
+                </div>
+              </li>
+            </ol>
+          </li>
+          <li>
+            Let |currentZoomLevel| be [=this=].<a data-cite="!screen-capture/#dfn-source"
+              >[[\Source]]</a
+            >'s [=zoom level=]
+          </li>
+          <li>Let |targetZoomLevel| be 100.</li>
+          <li>
+            <p>If |zoomAction| is <code>-1</code> then:</p>
+            <ol>
+              <li>
+                If |currentZoomLevel| is the minimum value in [=supported zoom levels=], return a
+                promise [=reject|rejected=] with a {{DOMException}} object whose
+                {{DOMException/name}} attribute has the value {{InvalidStateError}}.
+              </li>
+              <li>
+                Otherwise, set |targetZoomLevel| to the value in [=supported zoom levels=] that
+                appears immediately after |currentZoomLevel|.
+              </li>
+            </ol>
+          </li>
+          <li>
+            <p>If |zoomAction| is <code>1</code> then:</p>
+            <ol>
+              <li>
+                If |currentZoomLevel| is the maximum value in [=supported zoom levels=], return a
+                promise [=reject|rejected=] with a {{DOMException}} object whose
+                {{DOMException/name}} attribute has the value {{InvalidStateError}}.
+              </li>
+              <li>
+                Otherwise, set |targetZoomLevel| to the value in [=supported zoom levels=] that
+                appears immediately after |currentZoomLevel|.
+              </li>
+            </ol>
+          </li>
+          <li>Let |P| be a new {{Promise}}.</li>
+          <li>
+            <p>Run the following steps [=in parallel=]:</p>
+            <ol>
+              <li>
+                [=Request permission to use=] a {{PermissionDescriptor}} with its
+                {{PermissionDescriptor/name}} member set to
+                <a>"captured-surface-control"</a>. If the result of the request is
+                {{PermissionState/"denied"}}, [=reject=] |P| with a new {{DOMException}} object
+                whose {{DOMException/name}} is {{NotAllowedError}} and abort these steps.
+              </li>
+              <li>
+                Set [=this=].<a data-cite="!screen-capture/#dfn-source">[[\Source]]</a>'s [=zoom
+                level=] to |targetZoomLevel|.
+              </li>
+              <li>[=Resolve=] |P|.</li>
+            </ol>
+          </li>
+          <li>Return |P|.</li>
+        </ol>
+      </section>
+      <section>
         <h2>Subroutine: Forward wheel event</h2>
         <p>
           The <dfn>forward wheel event algorithm</dfn> takes a {{CaptureController}} |controller|
@@ -629,9 +691,10 @@
       <section>
         <h3>Zoom-setting: Limitation to specific interactions</h3>
         <p>
-          {{CaptureController/setZoomLevel()}} is only callable from event handlers of specific
+          {{CaptureController/increaseZoomLevel()}}, {{CaptureController/decreaseZoomLevel()}} and
+          {{CaptureController/resetZoomLevel()}} are only callable from event handlers of specific
           <a data-cite="DOM#dom-event-type">event types</a> - the
-          <a>permitted event types for setZoomLevel</a>. These are events dispatched directly by the
+          <a>permitted event types for zoom-setting</a>. These are events dispatched directly by the
           user agent, triggered by user interaction. This specification intentionally excludes from
           this set such events as <a data-cite="uievents#mousemove">"mousemove"</a>, which users are
           liable to trigger inadvertently.
@@ -650,15 +713,17 @@
         <h3>Limiting element types</h3>
         <p>
           This specification does not limit the type of {{Element}} for which either
-          {{CaptureController/setZoomLevel()}} or {{CaptureController/forwardWheel()}} work. Such a
-          limitation would accomplish nothing, because malicious applications could always overlay
+          {{CaptureController/increaseZoomLevel()}}, {{CaptureController/decreaseZoomLevel()}},
+          {{CaptureController/resetZoomLevel()}} or {{CaptureController/forwardWheel()}} work. Such
+          a limitation would accomplish nothing, because malicious applications could always overlay
           transparent permitted {{Element}} types on top of visible non-permitted {{Element}}s,
           thereby bypassing this restriction.
         </p>
         <p>
           The limitation of interaction types is sufficient. This is accomplished by
           {{CaptureController/forwardWheel()}} through its shape, and by
-          {{CaptureController/setZoomLevel()}} through its gating on
+          {{CaptureController/increaseZoomLevel()}}, {{CaptureController/decreaseZoomLevel()}} and
+          {{CaptureController/resetZoomLevel()}} through their gating on
           <a data-cite="DOM#dom-event-type">event types</a>.
         </p>
       </section>
