@@ -538,14 +538,14 @@
                 [=this=].{{CaptureController/[[forwardWheelElement]]}}.
               </li>
               <li>
-                [=Fire an event=] named `"wheel"` using {{WheelEvent}} with the {{MouseEvent/x}}
-                attribute initialized to |scaledX|, the {{MouseEvent/y}} attribute initialized to
-                |scaledY|, the {{WheelEvent/deltaX}} attribute initialized to
-                |event|.{{WheelEvent/deltaX}} and the {{WheelEvent/deltaY}} attribute initialized to
-                |event|.{{WheelEvent/deltaY}}, at |controller|.<a
-                  data-cite="!screen-capture/#dfn-source"
-                  >[[\Source]]</a
-                >'s viewport.
+                [=Queue a global task=] on the [=user interaction task source=] of
+                |controller|.[[\Source]]'s current realm, given that
+                <a data-cite="HTML#concept-realm-global">realm's global object</a>, to [=fire an
+                event=] named <code>"wheel"</code> using {{WheelEvent}} with the {{MouseEvent//x}}
+                attribute initialized to |scaledX|, the {{MouseEvent//y}} attribute initialized to
+                |scaledY|, the {{WheelEvent/deltaX}} attribute initialized to |event|.|deltaX| and
+                the {{WheelEvent/deltaY}} attribute initialized to |event|.|deltaY|, at the
+                <a data-cite="uievents#topmost-event-target">topmost event target</a>.
               </li>
             </ol>
           </li>
