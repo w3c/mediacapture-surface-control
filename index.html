@@ -264,142 +264,146 @@
 
     <section id="scrolling">
       <h1>Scroll</h1>
-      <h2>Scrolling APIs</h2>
-      <pre class="idl">
+      <section>
+        <h2>Scrolling APIs</h2>
+        <pre class="idl">
         partial interface CaptureController {
           constructor();
           Promise&lt;undefined&gt; forwardWheel(HTMLElement? element);
         };
-      </pre>
-      <dl data-link-for="CaptureController" data-dfn-for="CaptureController" class="methods">
-        <dt><dfn>constructor</dfn></dt>
-        <dd>
-          <p>
-            {{CaptureController}}'s
-            <a data-cite="!screen-capture/#dom-capturecontroller-constructor">constructor</a> is
-            extended to also define and initialize the following internal slots:
-          </p>
-          <table class="simple">
-            <thead>
-              <tr>
-                <th>Internal Slot</th>
-                <th>Initial value</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td><dfn>[[\ForwardWheelElement]]</dfn></td>
-                <td><code>null</code></td>
-              </tr>
-              <tr>
-                <td><dfn>[[\ForwardWheelEventListener]]</dfn></td>
-                <td><code>null</code></td>
-              </tr>
-            </tbody>
-          </table>
-        </dd>
-        <dt><dfn>forwardWheel()</dfn></dt>
-        <dd>
-          <p>
-            This method allows applications to automatically forward
-            <a href="https://w3c.github.io/uievents/#idl-wheelevent">wheel events</a>
-            from an {{HTMLElement}} to the viewport of a captured [=display surface=].
-          </p>
-          <p>When invoked, the user agent MUST run the following steps:</p>
-          <ol>
-            <li>
-              If [=this=] is not [=actively capturing=], return a promise [=reject|rejected=] with a
-              {{DOMException}} object whose {{DOMException/name}} attribute has the value
-              {{InvalidStateError}}.
-            </li>
-            <li>
-              If [=this=] [=is self-capturing=], return a promise [=reject|rejected=] with a
-              {{DOMException}} object whose {{DOMException/name}} attribute has the value
-              {{InvalidStateError}}.
-            </li>
-            <li>
-              Let |surfaceType| be [=this=].<a data-cite="!screen-capture/#dfn-displaysurfacetype"
-                >[[\DisplaySurfaceType]]</a
-              >.
-            </li>
-            <li>
-              If |surfaceType| is not a [=supported display surface type=], return a promise
-              [=reject|rejected=] with a {{DOMException}} object whose {{DOMException/name}}
-              attribute has the value {{NotSupportedError}}.
-            </li>
-            <li>Let |element| be the method's first argument.</li>
-            <li>Let |P| be a new {{Promise}}.</li>
-            <li>
-              Run the following steps [=in parallel=]:
-              <ol>
-                <li>
-                  [=Get the current permission state=] of <a>"captured-surface-control"</a>. If the
-                  result is NOT {{PermissionState/"granted"}}, and the [=relevant global object=]
-                  does NOT have [=transient activation=], return a promise [=reject|rejected=] with
-                  a {{DOMException}} object whose {{DOMException/name}} attribute has the value
-                  {{InvalidStateError}}.
-                  <div class="note">
-                    <p>
-                      This step ensures that on the one hand, permission prompts are not be shown
-                      without [=transient activation=], while on the one hand, if the permission is
-                      already {{PermissionState/"granted"}}, {{CaptureController/forwardWheel()}}
-                      may be called immediately after {{MediaDevices/getDisplayMedia()}} resolves,
-                      even if the [=transient activation=] that permitted the call to
-                      {{CaptureController/forwardWheel()}} has since expired.
-                    </p>
-                  </div>
-                </li>
-                <li>
-                  [=Request permission to use=] a {{PermissionDescriptor}} with its
-                  {{PermissionDescriptor/name}} member set to
-                  <a>"captured-surface-control"</a>. If the result of the request is
-                  {{PermissionState/"denied"}}, [=reject=] |P| with a new {{DOMException}} object
-                  whose {{DOMException/name}} is {{NotAllowedError}} and abort these steps.
-                </li>
-                <li>
-                  If [=this=].{{CaptureController/[[ForwardWheelElement]]}} is not
-                  <code>null</code>, [=remove an event listener=] with
-                  [=this=].{{CaptureController/[[ForwardWheelElement]]}} as |eventTarget| and
-                  [=this=].{{CaptureController/[[ForwardWheelEventListener]]}} as |listener|.
-                </li>
-                <li>
-                  Set [=this=].{{CaptureController/[[ForwardWheelEventListener]]}} to
-                  <code>null</code>.
-                </li>
-                <li>Set [=this=].{{CaptureController/[[ForwardWheelElement]]}} to |element|.</li>
-                <li>
-                  If [=this=].{{CaptureController/[[ForwardWheelElement]]}} is not
-                  <code>null</code>:
-                  <ol>
-                    <li>
-                      Set [=this=].{{CaptureController/[[ForwardWheelEventListener]]}} to an [=event
-                      listener=] defined as follows:
-                      <dl>
-                        <dt>type</dt>
-                        <dd><code>wheel</code></dd>
-                        <dt>[=event listener/callback=]</dt>
-                        <dd>
-                          The result of creating a new Web IDL {{EventListener}} instance
-                          representing a reference to a function of one argument of type {{Event}}
-                          |event|. This function executes the [=forward wheel event algorithm=]
-                          given [=this=] and |event|.
-                        </dd>
-                      </dl>
-                    </li>
-                    <li>
-                      [=Add an event listener=] with
-                      [=this=].{{CaptureController/[[ForwardWheelElement]]}} as |eventTarget| and
-                      [=this=].{{CaptureController/[[ForwardWheelEventListener]]}} as |listener|.
-                    </li>
-                  </ol>
-                </li>
-                <li>[=Resolve=] |P|.</li>
-              </ol>
-            </li>
-            <li>Return |P|.</li>
-          </ol>
-        </dd>
-      </dl>
+      </pre
+        >
+        <dl data-link-for="CaptureController" data-dfn-for="CaptureController" class="methods">
+          <dt><dfn>constructor</dfn></dt>
+          <dd>
+            <p>
+              {{CaptureController}}'s
+              <a data-cite="!screen-capture/#dom-capturecontroller-constructor">constructor</a> is
+              extended to also define and initialize the following internal slots:
+            </p>
+            <table class="simple">
+              <thead>
+                <tr>
+                  <th>Internal Slot</th>
+                  <th>Initial value</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><dfn>[[\ForwardWheelElement]]</dfn></td>
+                  <td><code>null</code></td>
+                </tr>
+                <tr>
+                  <td><dfn>[[\ForwardWheelEventListener]]</dfn></td>
+                  <td><code>null</code></td>
+                </tr>
+              </tbody>
+            </table>
+          </dd>
+          <dt><dfn>forwardWheel()</dfn></dt>
+          <dd>
+            <p>
+              This method allows applications to automatically forward
+              <a href="https://w3c.github.io/uievents/#idl-wheelevent">wheel events</a>
+              from an {{HTMLElement}} to the viewport of a captured [=display surface=].
+            </p>
+            <p>When invoked, the user agent MUST run the following steps:</p>
+            <ol>
+              <li>
+                If [=this=] is not [=actively capturing=], return a promise [=reject|rejected=] with
+                a {{DOMException}} object whose {{DOMException/name}} attribute has the value
+                {{InvalidStateError}}.
+              </li>
+              <li>
+                If [=this=] [=is self-capturing=], return a promise [=reject|rejected=] with a
+                {{DOMException}} object whose {{DOMException/name}} attribute has the value
+                {{InvalidStateError}}.
+              </li>
+              <li>
+                Let |surfaceType| be [=this=].<a data-cite="!screen-capture/#dfn-displaysurfacetype"
+                  >[[\DisplaySurfaceType]]</a
+                >.
+              </li>
+              <li>
+                If |surfaceType| is not a [=supported display surface type=], return a promise
+                [=reject|rejected=] with a {{DOMException}} object whose {{DOMException/name}}
+                attribute has the value {{NotSupportedError}}.
+              </li>
+              <li>Let |element| be the method's first argument.</li>
+              <li>Let |P| be a new {{Promise}}.</li>
+              <li>
+                Run the following steps [=in parallel=]:
+                <ol>
+                  <li>
+                    [=Get the current permission state=] of <a>"captured-surface-control"</a>. If
+                    the result is NOT {{PermissionState/"granted"}}, and the [=relevant global
+                    object=] does NOT have [=transient activation=], return a promise
+                    [=reject|rejected=] with a {{DOMException}} object whose {{DOMException/name}}
+                    attribute has the value {{InvalidStateError}}.
+                    <div class="note">
+                      <p>
+                        This step ensures that on the one hand, permission prompts are not be shown
+                        without [=transient activation=], while on the one hand, if the permission
+                        is already {{PermissionState/"granted"}},
+                        {{CaptureController/forwardWheel()}} may be called immediately after
+                        {{MediaDevices/getDisplayMedia()}} resolves, even if the [=transient
+                        activation=] that permitted the call to {{CaptureController/forwardWheel()}}
+                        has since expired.
+                      </p>
+                    </div>
+                  </li>
+                  <li>
+                    [=Request permission to use=] a {{PermissionDescriptor}} with its
+                    {{PermissionDescriptor/name}} member set to
+                    <a>"captured-surface-control"</a>. If the result of the request is
+                    {{PermissionState/"denied"}}, [=reject=] |P| with a new {{DOMException}} object
+                    whose {{DOMException/name}} is {{NotAllowedError}} and abort these steps.
+                  </li>
+                  <li>
+                    If [=this=].{{CaptureController/[[ForwardWheelElement]]}} is not
+                    <code>null</code>, [=remove an event listener=] with
+                    [=this=].{{CaptureController/[[ForwardWheelElement]]}} as |eventTarget| and
+                    [=this=].{{CaptureController/[[ForwardWheelEventListener]]}} as |listener|.
+                  </li>
+                  <li>
+                    Set [=this=].{{CaptureController/[[ForwardWheelEventListener]]}} to
+                    <code>null</code>.
+                  </li>
+                  <li>Set [=this=].{{CaptureController/[[ForwardWheelElement]]}} to |element|.</li>
+                  <li>
+                    If [=this=].{{CaptureController/[[ForwardWheelElement]]}} is not
+                    <code>null</code>:
+                    <ol>
+                      <li>
+                        Set [=this=].{{CaptureController/[[ForwardWheelEventListener]]}} to an
+                        [=event listener=] defined as follows:
+                        <dl>
+                          <dt>type</dt>
+                          <dd><code>wheel</code></dd>
+                          <dt>[=event listener/callback=]</dt>
+                          <dd>
+                            The result of creating a new Web IDL {{EventListener}} instance
+                            representing a reference to a function of one argument of type {{Event}}
+                            |event|. This function executes the [=forward wheel event algorithm=]
+                            given [=this=] and |event|.
+                          </dd>
+                        </dl>
+                      </li>
+                      <li>
+                        [=Add an event listener=] with
+                        [=this=].{{CaptureController/[[ForwardWheelElement]]}} as |eventTarget| and
+                        [=this=].{{CaptureController/[[ForwardWheelEventListener]]}} as |listener|.
+                      </li>
+                    </ol>
+                  </li>
+                  <li>[=Resolve=] |P|.</li>
+                </ol>
+              </li>
+              <li>Return |P|.</li>
+            </ol>
+          </dd>
+        </dl>
+      </section>
     </section>
 
     <section>
