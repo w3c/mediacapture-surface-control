@@ -137,7 +137,7 @@
         <pre class="idl">
           partial interface CaptureController {
             sequence&lt;long&gt; getSupportedZoomLevels();
-            long getZoomLevel();
+            readonly attribute long? zoomLevel;
             Promise&lt;undefined&gt; increaseZoomLevel();
             Promise&lt;undefined&gt; decreaseZoomLevel();
             Promise&lt;undefined&gt; resetZoomLevel();
@@ -168,25 +168,15 @@
               </li>
             </ol>
           </dd>
-          <dt><dfn>getZoomLevel()</dfn></dt>
+          <dt><dfn>zoomLevel</dfn></dt>
           <dd>
             <p>
-              This method allows applications to discover the captured [=display surface=]'s [=zoom
-              level=].
+              This attribute allows applications to discover the captured [=display surface=]'s
+              [=zoom level=].
             </p>
-            <p>When invoked, the user agent MUST run the following steps:</p>
-            <ol>
-              <li>
-                If [=this=] is not [=actively capturing=], [=exception/throw=] an
-                "{{InvalidStateError}}" {{DOMException}}.
-              </li>
-              <li>
-                If [=this=].{{CaptureController/[[DisplaySurfaceType]]}} is not a [=supported
-                display surface type=], [=exception/throw=] a "{{NotSupportedError}}"
-                {{DOMException}}.
-              </li>
-              <li>Return [=this=].{{CaptureController/[[Source]]}}'s [=zoom level=].</li>
-            </ol>
+            <p>
+              On getting, the user agent MUST return [=this=].{{CaptureController/[[ZoomLevel]]}}.
+            </p>
           </dd>
           <dt><dfn>increaseZoomLevel()</dfn></dt>
           <dd>
@@ -228,10 +218,16 @@
               `zoomlevelchange`.
             </p>
             <p>
-              Given a {{CaptureController}} |controller|, the user agent MUST [=fire an event=]
-              named `zoomlevelchange` at |controller| whenever
-              |controller|.{{CaptureController/[[Source]]}}'s [=zoom level=] changes.
+              Whenever [=this=].<a data-cite="!screen-capture/#dfn-source">[[\Source]]</a>'s [=zoom
+              level=] changes to |newZoomLevel|, the user agent MUST [=queue a global task=] on the
+              [=user interaction task source=] given the current realm's global object, which will
+              run the following stpes:
             </p>
+            <ol>
+              <li>If [=this=] is not [=actively capturing=], abort these steps.</li>
+              <li>Set [=this=].{{CaptureController/[[ZoomLevel]]}} to |newZoomLevel|.</li>
+              <li>[=Fire an event=] named `capturedzoomlevelchange` at [=this=].</li>
+            </ol>
             <div class="note">
               <p>Examples of causes include:</p>
               <ul>
@@ -261,7 +257,7 @@
             Promise&lt;undefined&gt; forwardWheel(HTMLElement? element);
           };
         </pre>
-        <dl data-link-for="CaptureController" data-dfn-for="CaptureController" class="methods">
+        <dl data-link-for="CaptureController" data-dfn-for="CaptureController">
           <dt><dfn>constructor</dfn></dt>
           <dd>
             <p>
@@ -277,6 +273,10 @@
                 </tr>
               </thead>
               <tbody>
+                <tr>
+                  <td><dfn>[[\ZoomLevel]]</dfn></td>
+                  <td>`null`</td>
+                </tr>
                 <tr>
                   <td><dfn>[[\ForwardWheelElement]]</dfn></td>
                   <td>`null`</td>
@@ -402,6 +402,33 @@
             </ol>
           </dd>
         </dl>
+      </section>
+      <section>
+        <h2>Extensions to the getDisplayMedia algorithm</h2>
+        <p>
+          Extend the
+          <a data-cite="screen-capture#dom-mediadevices-getdisplaymedia"
+            >getDisplayMedia algorithm</a
+          >
+          as follows:
+        </p>
+        <p>
+          Recall that |p| is the promise which the algorithm returns. Immediately before the step
+          which resolves it, add the following steps:
+        </p>
+        <ol>
+          <li>
+            If |controller| is not `null` and |controller|.<a
+              data-cite="screen-capture/#dfn-displaysurfacetype"
+              >[[\DisplaySurfaceType]]</a
+            >
+            is a [=supported display surface type=], then set
+            |controller|.{{CaptureController/[[ZoomLevel]]}} to |controller|.<a
+              data-cite="!screen-capture/#dfn-source"
+              >[[\Source]]</a
+            >'s [=zoom level=].
+          </li>
+        </ol>
       </section>
     </section>
 
