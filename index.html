@@ -72,8 +72,8 @@
       <h1>Permissions Policy Integration</h1>
       <p>
         This specification defines a [=policy-controlled feature=] identified by the string
-        <dfn class="permission export"><code>"captured-surface-control"</code></dfn
-        >. Its [=policy-controlled feature/default allowlist=] is <code>"self"</code>.
+        <dfn class="permission export">`"captured-surface-control"`</dfn>. Its [=policy-controlled
+        feature/default allowlist=] is `"self"`.
       </p>
       <div class="note">
         <p>
@@ -205,7 +205,7 @@
             </p>
             <p>
               When this method is invoked, the user agent MUST run the [=set zoom level algorithm=]
-              with [=this=] as the |controller| and <code>"increase"</code> as the |zoomAction|.
+              with [=this=] as the |controller| and `"increase"` as the |zoomAction|.
             </p>
           </dd>
           <dt><dfn>decreaseZoomLevel()</dfn></dt>
@@ -216,7 +216,7 @@
             </p>
             <p>
               When this method is invoked, the user agent MUST run the [=set zoom level algorithm=]
-              with [=this=] as the |controller| and <code>"decrease"</code> as the |zoomAction|.
+              with [=this=] as the |controller| and `"decrease"` as the |zoomAction|.
             </p>
           </dd>
           <dt><dfn>resetZoomLevel()</dfn></dt>
@@ -227,7 +227,7 @@
             </p>
             <p>
               When this method is invoked, the user agent MUST run the [=set zoom level algorithm=]
-              with [=this=] as the |controller| and <code>"reset"</code> as the |zoomAction|.
+              with [=this=] as the |controller| and `"reset"` as the |zoomAction|.
             </p>
           </dd>
           <dt><dfn>onzoomlevelchange</dfn></dt>
@@ -290,11 +290,11 @@
               <tbody>
                 <tr>
                   <td><dfn>[[\ForwardWheelElement]]</dfn></td>
-                  <td><code>null</code></td>
+                  <td>`null`</td>
                 </tr>
                 <tr>
                   <td><dfn>[[\ForwardWheelEventListener]]</dfn></td>
-                  <td><code>null</code></td>
+                  <td>`null`</td>
                 </tr>
               </tbody>
             </table>
@@ -359,26 +359,24 @@
                     whose {{DOMException/name}} is {{NotAllowedError}} and abort these steps.
                   </li>
                   <li>
-                    If [=this=].{{CaptureController/[[ForwardWheelElement]]}} is not
-                    <code>null</code>, [=remove an event listener=] with
+                    If [=this=].{{CaptureController/[[ForwardWheelElement]]}} is not `null`,
+                    [=remove an event listener=] with
                     [=this=].{{CaptureController/[[ForwardWheelElement]]}} as |eventTarget| and
                     [=this=].{{CaptureController/[[ForwardWheelEventListener]]}} as |listener|.
                   </li>
                   <li>
-                    Set [=this=].{{CaptureController/[[ForwardWheelEventListener]]}} to
-                    <code>null</code>.
+                    Set [=this=].{{CaptureController/[[ForwardWheelEventListener]]}} to `null`.
                   </li>
                   <li>Set [=this=].{{CaptureController/[[ForwardWheelElement]]}} to |element|.</li>
                   <li>
-                    If [=this=].{{CaptureController/[[ForwardWheelElement]]}} is not
-                    <code>null</code>:
+                    If [=this=].{{CaptureController/[[ForwardWheelElement]]}} is not `null`:
                     <ol>
                       <li>
                         Set [=this=].{{CaptureController/[[ForwardWheelEventListener]]}} to an
                         [=event listener=] defined as follows:
                         <dl>
                           <dt>type</dt>
-                          <dd><code>wheel</code></dd>
+                          <dd>`wheel`</dd>
                           <dt>[=event listener/callback=]</dt>
                           <dd>
                             The result of creating a new Web IDL {{EventListener}} instance
@@ -418,12 +416,12 @@
             <!-- TODO: Fix the export of CaptureController's internal slots and use them. -->
             Let |source| be |controller|.<a data-cite="!screen-capture/#dfn-source">[[\Source]]</a>.
           </li>
-          <li>If |source| is <code>null</code>, return <code>false</code>.</li>
+          <li>If |source| is `null`, return `false`.</li>
           <li>
             If |source| has been <a data-cite="GETUSERMEDIA#source-stopped">stopped</a>, return
-            <code>false</code>.
+            `false`.
           </li>
-          <li>Return <code>true</code>.</li>
+          <li>Return `true`.</li>
         </ol>
       </section>
       <section>
@@ -433,13 +431,13 @@
           <dfn>is self-capturing</dfn>, run the following steps:
         </p>
         <ol>
-          <li>If |controller| is not [=actively capturing=], return <code>false</code>.</li>
+          <li>If |controller| is not [=actively capturing=], return `false`.</li>
           <li>
             If |controller|.<a data-cite="!screen-capture/#dfn-source">[[\Source]]</a> is a
             [=display surface=] of type [=display surface/browser=], and represents the [=relevant
-            global object=]'s [=associated `Document`=], return <code>true</code>.
+            global object=]'s [=associated `Document`=], return `true`.
           </li>
-          <li>Return <code>false</code>.</li>
+          <li>Return `false`.</li>
         </ol>
       </section>
       <section>
@@ -449,8 +447,8 @@
           <dfn>supported display surface type</dfn>, run the following steps:
         </p>
         <ol>
-          <li>If |surfaceType| is [=display surface/browser=], return <code>true</code>.</li>
-          <li>Return <code>false</code>.</li>
+          <li>If |surfaceType| is [=display surface/browser=], return `true`.</li>
+          <li>Return `false`.</li>
         </ol>
         <div class="note">
           <p>Whether [=display surface/window=] should be supported is under discussion.</p>
@@ -498,7 +496,7 @@
                 {{InvalidStateError}}.
               </li>
               <li>
-                If |currentEvent|.{{Event/isTrusted}} is <code>false</code>, return a promise
+                If |currentEvent|.{{Event/isTrusted}} is `false`, return a promise
                 [=reject|rejected=] with a {{DOMException}} object whose {{DOMException/name}}
                 attribute has the value {{InvalidStateError}}.
               </li>
@@ -532,7 +530,7 @@
           <li>Let |targetZoomLevel| be a {{long}}. Set its value as follows:</li>
           <ol>
             <li>
-              <p>If |zoomAction| is <code>"decrease"</code> then:</p>
+              <p>If |zoomAction| is `"decrease"` then:</p>
               <ol>
                 <li>
                   If |currentZoomLevel| is the minimum value in [=supported zoom levels=], return a
@@ -546,7 +544,7 @@
               </ol>
             </li>
             <li>
-              <p>Else, if |zoomAction| is <code>"increase"</code> then:</p>
+              <p>Else, if |zoomAction| is `"increase"` then:</p>
               <ol>
                 <li>
                   If |currentZoomLevel| is the maximum value in [=supported zoom levels=], return a
@@ -562,8 +560,8 @@
             <li>
               <p>Else:</p>
               <ol>
-                <li>Assert that |zoomAction| is <code>"reset"</code>.</li>
-                <li>Set |targetZoomLevel| to <code>100</code>.</li>
+                <li>Assert that |zoomAction| is `"reset"`.</li>
+                <li>Set |targetZoomLevel| to `100`.</li>
               </ol>
             </li>
           </ol>
@@ -610,7 +608,7 @@
                 [=Get the current permission state=] of <a>"captured-surface-control"</a>. If the
                 result is NOT {{PermissionState/"granted"}}, abort these steps.
               </li>
-              <li>If |event|.{{Event/isTrusted}} is <code>false</code>, abort these steps.</li>
+              <li>If |event|.{{Event/isTrusted}} is `false`, abort these steps.</li>
               <li>
                 Let [|scaledX|, |scaledY|] be the result of the [=scale element coordinates
                 algorithm=] on [|event|.{{MouseEvent/offsetX}}, |event|.{{MouseEvent/offsetY}}] and
@@ -620,10 +618,10 @@
                 [=Queue a global task=] on the [=user interaction task source=] of
                 |controller|.[[\Source]]'s current realm, given that
                 <a data-cite="HTML#concept-realm-global">realm's global object</a>, to [=fire an
-                event=] named <code>"wheel"</code> using {{WheelEvent}} with the {{MouseEvent//x}}
-                attribute initialized to |scaledX|, the {{MouseEvent//y}} attribute initialized to
-                |scaledY|, the {{WheelEvent/deltaX}} attribute initialized to |event|.|deltaX| and
-                the {{WheelEvent/deltaY}} attribute initialized to |event|.|deltaY|, at the
+                event=] named `"wheel"` using {{WheelEvent}} with the {{MouseEvent//x}} attribute
+                initialized to |scaledX|, the {{MouseEvent//y}} attribute initialized to |scaledY|,
+                the {{WheelEvent/deltaX}} attribute initialized to |event|.|deltaX| and the
+                {{WheelEvent/deltaY}} attribute initialized to |event|.|deltaY|, at the
                 <a data-cite="uievents#topmost-event-target">topmost event target</a>.
               </li>
             </ol>
@@ -661,14 +659,8 @@
               >[[\Source]]</a
             >'s viewport's height.
           </li>
-          <li>
-            Let |scaledX| be
-            <code>(|scaleFactorX| * |surfaceWidth|)</code>.
-          </li>
-          <li>
-            Let |scaledY| be
-            <code>(|scaleFactorY| * |surfaceHeight|)</code>.
-          </li>
+          <li>Let |scaledX| be `(|scaleFactorX| * |surfaceWidth|)`.</li>
+          <li>Let |scaledY| be `(|scaleFactorY| * |surfaceHeight|)`.</li>
           <li>Return [|scaledX|, |scaledY|].</li>
         </ol>
         <div class="note">
