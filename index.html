@@ -288,11 +288,11 @@
             </thead>
             <tbody>
               <tr>
-                <td><dfn>[[\forwardWheelElement]]</dfn></td>
+                <td><dfn>[[\ForwardWheelElement]]</dfn></td>
                 <td><code>null</code></td>
               </tr>
               <tr>
-                <td><dfn>[[\forwardWheelEventListener]]</dfn></td>
+                <td><dfn>[[\ForwardWheelEventListener]]</dfn></td>
                 <td><code>null</code></td>
               </tr>
             </tbody>
@@ -357,22 +357,22 @@
                   whose {{DOMException/name}} is {{NotAllowedError}} and abort these steps.
                 </li>
                 <li>
-                  If [=this=].{{CaptureController/[[forwardWheelElement]]}} is not
+                  If [=this=].{{CaptureController/[[ForwardWheelElement]]}} is not
                   <code>null</code>, [=remove an event listener=] with
-                  [=this=].{{CaptureController/[[forwardWheelElement]]}} as |eventTarget| and
-                  [=this=].{{CaptureController/[[forwardWheelEventListener]]}} as |listener|.
+                  [=this=].{{CaptureController/[[ForwardWheelElement]]}} as |eventTarget| and
+                  [=this=].{{CaptureController/[[ForwardWheelEventListener]]}} as |listener|.
                 </li>
                 <li>
-                  Set [=this=].{{CaptureController/[[forwardWheelEventListener]]}} to
+                  Set [=this=].{{CaptureController/[[ForwardWheelEventListener]]}} to
                   <code>null</code>.
                 </li>
-                <li>Set [=this=].{{CaptureController/[[forwardWheelElement]]}} to |element|.</li>
+                <li>Set [=this=].{{CaptureController/[[ForwardWheelElement]]}} to |element|.</li>
                 <li>
-                  If [=this=].{{CaptureController/[[forwardWheelElement]]}} is not
+                  If [=this=].{{CaptureController/[[ForwardWheelElement]]}} is not
                   <code>null</code>:
                   <ol>
                     <li>
-                      Set [=this=].{{CaptureController/[[forwardWheelEventListener]]}} to an [=event
+                      Set [=this=].{{CaptureController/[[ForwardWheelEventListener]]}} to an [=event
                       listener=] defined as follows:
                       <dl>
                         <dt>type</dt>
@@ -388,8 +388,8 @@
                     </li>
                     <li>
                       [=Add an event listener=] with
-                      [=this=].{{CaptureController/[[forwardWheelElement]]}} as |eventTarget| and
-                      [=this=].{{CaptureController/[[forwardWheelEventListener]]}} as |listener|.
+                      [=this=].{{CaptureController/[[ForwardWheelElement]]}} as |eventTarget| and
+                      [=this=].{{CaptureController/[[ForwardWheelEventListener]]}} as |listener|.
                     </li>
                   </ol>
                 </li>
@@ -611,7 +611,7 @@
               <li>
                 Let [|scaledX|, |scaledY|] be the result of the [=scale element coordinates
                 algorithm=] on [|event|.{{MouseEvent/offsetX}}, |event|.{{MouseEvent/offsetY}}] and
-                [=this=].{{CaptureController/[[forwardWheelElement]]}}.
+                [=this=].{{CaptureController/[[ForwardWheelElement]]}}.
               </li>
               <li>
                 [=Queue a global task=] on the [=user interaction task source=] of
@@ -638,14 +638,14 @@
             Let |scaleFactorX| be
             <code
               >(|x| /
-              |controller|.{{CaptureController/[[forwardWheelElement]]}}.{{Element/getBoundingClientRect()}}.{{DOMRect/width}})</code
+              |controller|.{{CaptureController/[[ForwardWheelElement]]}}.{{Element/getBoundingClientRect()}}.{{DOMRect/width}})</code
             >.
           </li>
           <li>
             Let |scaleFactorX| be
             <code
               >(|x| /
-              |controller|.{{CaptureController/[[forwardWheelElement]]}}.{{Element/getBoundingClientRect()}}.{{DOMRect/height}})</code
+              |controller|.{{CaptureController/[[ForwardWheelElement]]}}.{{Element/getBoundingClientRect()}}.{{DOMRect/height}})</code
             >.
           </li>
           <li>
