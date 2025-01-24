@@ -205,7 +205,7 @@
             </p>
             <p>
               When this method is invoked, the user agent MUST run the [=set zoom level algorithm=]
-              and return its result.
+              with [=this=] as the |controller| and <code>"increase"</code> as the |zoomAction|.
             </p>
           </dd>
           <dt><dfn>decreaseZoomLevel()</dfn></dt>
@@ -216,7 +216,7 @@
             </p>
             <p>
               When this method is invoked, the user agent MUST run the [=set zoom level algorithm=]
-              and return its result.
+              with [=this=] as the |controller| and <code>"decrease"</code> as the |zoomAction|.
             </p>
           </dd>
           <dt><dfn>resetZoomLevel()</dfn></dt>
@@ -227,7 +227,7 @@
             </p>
             <p>
               When this method is invoked, the user agent MUST run the [=set zoom level algorithm=]
-              and return its result.
+              with [=this=] as the |controller| and <code>"reset"</code> as the |zoomAction|.
             </p>
           </dd>
           <dt><dfn>onzoomlevelchange</dfn></dt>
@@ -457,22 +457,22 @@
         <h2>Subroutine: Setting the zoom level</h2>
         <p>
           The <dfn>set zoom level algorithm</dfn>, given a |controller:CaptureController| of type
-          {{CaptureController}} and a |zoomAction:long| of type {{long}} as arguments, consists of
-          running the following steps:
+          {{CaptureController}} and a |zoomAction:DOMString| of type {{DOMString}} as arguments,
+          consists of running the following steps:
         </p>
         <ol>
           <li>
-            If [=this=] is not [=actively capturing=], return a promise [=reject|rejected=] with a
+            If |controller| is not [=actively capturing=], return a promise [=reject|rejected=] with
+            a {{DOMException}} object whose {{DOMException/name}} attribute has the value
+            {{InvalidStateError}}.
+          </li>
+          <li>
+            If |controller| [=is self-capturing=], return a promise [=reject|rejected=] with a
             {{DOMException}} object whose {{DOMException/name}} attribute has the value
             {{InvalidStateError}}.
           </li>
           <li>
-            If [=this=] [=is self-capturing=], return a promise [=reject|rejected=] with a
-            {{DOMException}} object whose {{DOMException/name}} attribute has the value
-            {{InvalidStateError}}.
-          </li>
-          <li>
-            Let |surfaceType| be [=this=].<a data-cite="!screen-capture/#dfn-displaysurfacetype"
+            Let |surfaceType| be |controller|.<a data-cite="!screen-capture/#dfn-displaysurfacetype"
               >[[\DisplaySurfaceType]]</a
             >.
           </li>
@@ -522,39 +522,48 @@
             </ol>
           </li>
           <li>
-            Let |currentZoomLevel| be [=this=].<a data-cite="!screen-capture/#dfn-source"
+            Let |currentZoomLevel| be |controller|.<a data-cite="!screen-capture/#dfn-source"
               >[[\Source]]</a
             >'s [=zoom level=]
           </li>
-          <li>Let |targetZoomLevel| be 100.</li>
-          <li>
-            <p>If |zoomAction| is <code>-1</code> then:</p>
-            <ol>
-              <li>
-                If |currentZoomLevel| is the minimum value in [=supported zoom levels=], return a
-                promise [=reject|rejected=] with a {{DOMException}} object whose
-                {{DOMException/name}} attribute has the value {{InvalidStateError}}.
-              </li>
-              <li>
-                Otherwise, set |targetZoomLevel| to the value in [=supported zoom levels=] that
-                appears immediately after |currentZoomLevel|.
-              </li>
-            </ol>
-          </li>
-          <li>
-            <p>If |zoomAction| is <code>1</code> then:</p>
-            <ol>
-              <li>
-                If |currentZoomLevel| is the maximum value in [=supported zoom levels=], return a
-                promise [=reject|rejected=] with a {{DOMException}} object whose
-                {{DOMException/name}} attribute has the value {{InvalidStateError}}.
-              </li>
-              <li>
-                Otherwise, set |targetZoomLevel| to the value in [=supported zoom levels=] that
-                appears immediately after |currentZoomLevel|.
-              </li>
-            </ol>
-          </li>
+          <li>Let |targetZoomLevel| be a {{long}}. Set its value as follows:</li>
+          <ol>
+            <li>
+              <p>If |zoomAction| is <code>"decrease"</code> then:</p>
+              <ol>
+                <li>
+                  If |currentZoomLevel| is the minimum value in [=supported zoom levels=], return a
+                  promise [=reject|rejected=] with a {{DOMException}} object whose
+                  {{DOMException/name}} attribute has the value {{InvalidStateError}}.
+                </li>
+                <li>
+                  Otherwise, set |targetZoomLevel| to the value in [=supported zoom levels=] that
+                  appears immediately after |currentZoomLevel|.
+                </li>
+              </ol>
+            </li>
+            <li>
+              <p>Else, if |zoomAction| is <code>"increase"</code> then:</p>
+              <ol>
+                <li>
+                  If |currentZoomLevel| is the maximum value in [=supported zoom levels=], return a
+                  promise [=reject|rejected=] with a {{DOMException}} object whose
+                  {{DOMException/name}} attribute has the value {{InvalidStateError}}.
+                </li>
+                <li>
+                  Otherwise, set |targetZoomLevel| to the value in [=supported zoom levels=] that
+                  appears immediately after |currentZoomLevel|.
+                </li>
+              </ol>
+            </li>
+            <li>
+              <p>Else:</p>
+              <ol>
+                <li>Assert that |zoomAction| is <code>"reset"</code>.</li>
+                <li>Set |targetZoomLevel| to <code>100</code>.</li>
+              </ol>
+            </li>
+          </ol>
           <li>Let |P| be a new {{Promise}}.</li>
           <li>
             <p>Run the following steps [=in parallel=]:</p>
