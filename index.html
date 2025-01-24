@@ -157,11 +157,7 @@
                 If [=this=] is not [=actively capturing=], [=exception/throw=] an
                 "{{InvalidStateError}}" {{DOMException}}.
               </li>
-              <li>
-                Let |surfaceType| be [=this=].<a data-cite="!screen-capture/#dfn-displaysurfacetype"
-                  >[[\DisplaySurfaceType]]</a
-                >.
-              </li>
+              <li>Let |surfaceType| be [=this=].{{CaptureController/[[DisplaySurfaceType]]}}.</li>
               <li>
                 If |surfaceType| is not a [=supported display surface type=], [=exception/throw=] a
                 "{{NotSupportedError}}" {{DOMException}}.
@@ -185,16 +181,11 @@
                 "{{InvalidStateError}}" {{DOMException}}.
               </li>
               <li>
-                If [=this=].<a data-cite="!screen-capture/#dfn-displaysurfacetype"
-                  >[[\DisplaySurfaceType]]</a
-                >
-                is not a [=supported display surface type=], [=exception/throw=] a
-                "{{NotSupportedError}}" {{DOMException}}.
+                If [=this=].{{CaptureController/[[DisplaySurfaceType]]}} is not a [=supported
+                display surface type=], [=exception/throw=] a "{{NotSupportedError}}"
+                {{DOMException}}.
               </li>
-              <li>
-                Return [=this=].<a data-cite="!screen-capture/#dfn-source">[[\Source]]</a>'s [=zoom
-                level=].
-              </li>
+              <li>Return [=this=].{{CaptureController/[[Source]]}}'s [=zoom level=].</li>
             </ol>
           </dd>
           <dt><dfn>increaseZoomLevel()</dfn></dt>
@@ -238,10 +229,8 @@
             </p>
             <p>
               Given a {{CaptureController}} |controller|, the user agent MUST [=fire an event=]
-              named `zoomlevelchange` at |controller| whenever |controller|.<a
-                data-cite="!screen-capture/#dfn-source"
-                >[[\Source]]</a
-              >'s [=zoom level=] changes.
+              named `zoomlevelchange` at |controller| whenever
+              |controller|.{{CaptureController/[[Source]]}}'s [=zoom level=] changes.
             </p>
             <div class="note">
               <p>Examples of causes include:</p>
@@ -303,7 +292,7 @@
           <dd>
             <p>
               This method allows applications to automatically forward
-              <a href="https://w3c.github.io/uievents/#idl-wheelevent">wheel events</a>
+              <a data-cite="uievents/#idl-wheelevent">wheel events</a>
               from an {{HTMLElement}} to the viewport of a captured [=display surface=].
             </p>
             <p>When invoked, the user agent MUST run the following steps:</p>
@@ -318,11 +307,7 @@
                 {{DOMException}} object whose {{DOMException/name}} attribute has the value
                 {{InvalidStateError}}.
               </li>
-              <li>
-                Let |surfaceType| be [=this=].<a data-cite="!screen-capture/#dfn-displaysurfacetype"
-                  >[[\DisplaySurfaceType]]</a
-                >.
-              </li>
+              <li>Let |surfaceType| be [=this=].{{CaptureController/[[DisplaySurfaceType]]}}.</li>
               <li>
                 If |surfaceType| is not a [=supported display surface type=], return a promise
                 [=reject|rejected=] with a {{DOMException}} object whose {{DOMException/name}}
@@ -412,10 +397,7 @@
           <dfn>actively capturing</dfn>, run the following steps:
         </p>
         <ol>
-          <li>
-            <!-- TODO: Fix the export of CaptureController's internal slots and use them. -->
-            Let |source| be |controller|.<a data-cite="!screen-capture/#dfn-source">[[\Source]]</a>.
-          </li>
+          <li>Let |source| be |controller|.{{CaptureController/[[Source]]}}.</li>
           <li>If |source| is `null`, return `false`.</li>
           <li>
             If |source| has been <a data-cite="GETUSERMEDIA#source-stopped">stopped</a>, return
@@ -433,9 +415,9 @@
         <ol>
           <li>If |controller| is not [=actively capturing=], return `false`.</li>
           <li>
-            If |controller|.<a data-cite="!screen-capture/#dfn-source">[[\Source]]</a> is a
-            [=display surface=] of type [=display surface/browser=], and represents the [=relevant
-            global object=]'s [=associated `Document`=], return `true`.
+            If |controller|.{{CaptureController/[[Source]]}} is a [=display surface=] of type
+            [=display surface/browser=], and represents the [=relevant global object=]'s
+            [=associated `Document`=], return `true`.
           </li>
           <li>Return `false`.</li>
         </ol>
@@ -472,11 +454,7 @@
             {{DOMException}} object whose {{DOMException/name}} attribute has the value
             {{InvalidStateError}}.
           </li>
-          <li>
-            Let |surfaceType| be |controller|.<a data-cite="!screen-capture/#dfn-displaysurfacetype"
-              >[[\DisplaySurfaceType]]</a
-            >.
-          </li>
+          <li>Let |surfaceType| be |controller|.{{CaptureController/[[DisplaySurfaceType]]}}.</li>
           <li>
             If |surfaceType| is not a [=supported display surface type=], return a promise
             [=reject|rejected=] with a {{DOMException}} object whose {{DOMException/name}} attribute
@@ -501,10 +479,9 @@
                 attribute has the value {{InvalidStateError}}.
               </li>
               <li>
-                If |currentEvent|.{{Event/type}} is not in
-                <a>permitted event types for zoom-setting</a>, return a promise [=reject|rejected=]
-                with a {{DOMException}} object whose {{DOMException/name}} attribute has the value
-                {{InvalidStateError}}.
+                If |currentEvent|.{{Event/type}} is not in [=permitted event types for
+                zoom-setting=], return a promise [=reject|rejected=] with a {{DOMException}} object
+                whose {{DOMException/name}} attribute has the value {{InvalidStateError}}.
                 <div class="note">
                   <p>
                     It follows from these steps that {{CaptureController/increaseZoomLevel()}},
@@ -523,9 +500,7 @@
             </ol>
           </li>
           <li>
-            Let |currentZoomLevel| be |controller|.<a data-cite="!screen-capture/#dfn-source"
-              >[[\Source]]</a
-            >'s [=zoom level=]
+            Let |currentZoomLevel| be |controller|.{{CaptureController/[[Source]]}}'s [=zoom level=]
           </li>
           <li>Let |targetZoomLevel| be a {{long}}. Set its value as follows:</li>
           <ol>
@@ -577,8 +552,7 @@
                 whose {{DOMException/name}} is {{NotAllowedError}} and abort these steps.
               </li>
               <li>
-                Set [=this=].<a data-cite="!screen-capture/#dfn-source">[[\Source]]</a>'s [=zoom
-                level=] to |targetZoomLevel|.
+                Set [=this=].{{CaptureController/[[Source]]}}'s [=zoom level=] to |targetZoomLevel|.
               </li>
               <li>[=Resolve=] |P|.</li>
             </ol>
@@ -595,11 +569,7 @@
         <ol>
           <li>If |controller| is not [=actively capturing=], abort these steps.</li>
           <li>If [=this=] [=is self-capturing=], abort these steps.</li>
-          <li>
-            Let |surfaceType| be |controller|.<a data-cite="!screen-capture/#dfn-displaysurfacetype"
-              >[[\DisplaySurfaceType]]</a
-            >.
-          </li>
+          <li>Let |surfaceType| be |controller|.{{CaptureController/[[DisplaySurfaceType]]}}.</li>
           <li>If |surfaceType| is not a [=supported display surface type=], abort these steps.</li>
           <li>
             Run the following steps [=in parallel=]:
@@ -650,14 +620,11 @@
             >.
           </li>
           <li>
-            Let |surfaceWidth| be |controller|.<a data-cite="!screen-capture/#dfn-source"
-              >[[\Source]]</a
-            >'s viewport's width.
+            Let |surfaceWidth| be |controller|.{{CaptureController/[[Source]]}}'s viewport's width.
           </li>
           <li>
-            Let |surfaceHeight| be |controller|.<a data-cite="!screen-capture/#dfn-source"
-              >[[\Source]]</a
-            >'s viewport's height.
+            Let |surfaceHeight| be |controller|.{{CaptureController/[[Source]]}}'s viewport's
+            height.
           </li>
           <li>Let |scaledX| be `(|scaleFactorX| * |surfaceWidth|)`.</li>
           <li>Let |scaledY| be `(|scaleFactorY| * |surfaceHeight|)`.</li>
@@ -702,11 +669,11 @@
         <p>
           {{CaptureController/increaseZoomLevel()}}, {{CaptureController/decreaseZoomLevel()}} and
           {{CaptureController/resetZoomLevel()}} are only callable from event handlers of specific
-          <a data-cite="DOM#dom-event-type">event types</a> - the
-          <a>permitted event types for zoom-setting</a>. These are events dispatched directly by the
-          user agent, triggered by user interaction. This specification intentionally excludes from
-          this set such events as <a data-cite="uievents#mousemove">"mousemove"</a>, which users are
-          liable to trigger inadvertently.
+          <a data-cite="DOM#dom-event-type">event types</a> - the [=permitted event types for
+          zoom-setting=]. These are events dispatched directly by the user agent, triggered by user
+          interaction. This specification intentionally excludes from this set such events as
+          <a data-cite="uievents#mousemove">"mousemove"</a>, which users are liable to trigger
+          inadvertently.
         </p>
       </section>
       <section>
