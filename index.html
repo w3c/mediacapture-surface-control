@@ -397,10 +397,7 @@
           <dfn>actively capturing</dfn>, run the following steps:
         </p>
         <ol>
-          <li>
-            <!-- TODO: Fix the export of CaptureController's internal slots and use them. -->
-            Let |source| be |controller|.{{CaptureController/[[Source]]}}.
-          </li>
+          <li>Let |source| be |controller|.{{CaptureController/[[Source]]}}.</li>
           <li>If |source| is `null`, return `false`.</li>
           <li>
             If |source| has been <a data-cite="GETUSERMEDIA#source-stopped">stopped</a>, return
