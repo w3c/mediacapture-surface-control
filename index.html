@@ -321,9 +321,16 @@
                   <li>
                     [=Get the current permission state=] of <a>"captured-surface-control"</a>. If
                     the result is NOT {{PermissionState/"granted"}}, and the [=relevant global
-                    object=] does NOT have [=transient activation=], return a promise
-                    [=reject|rejected=] with a {{DOMException}} object whose {{DOMException/name}}
-                    attribute has the value {{InvalidStateError}}.
+                    object=] does NOT have [=transient activation=], then:
+                    <ol>
+                      <li>
+                        [=Queue a global task=] on the [=user interaction task source=] given the
+                        current realm's [=global object=] as |global| to [=reject=] |P| with a
+                        {{DOMException}} object whose {{DOMException/name}} attribute has the value
+                        {{InvalidStateError}}.
+                      </li>
+                      <li>Abort these steps.</li>
+                    </ol>
                     <div class="note">
                       <p>
                         This step ensures that on the one hand, permission prompts are not be shown
@@ -340,8 +347,15 @@
                     [=Request permission to use=] a {{PermissionDescriptor}} with its
                     {{PermissionDescriptor/name}} member set to
                     <a>"captured-surface-control"</a>. If the result of the request is
-                    {{PermissionState/"denied"}}, [=reject=] |P| with a new {{DOMException}} object
-                    whose {{DOMException/name}} is {{NotAllowedError}} and abort these steps.
+                    {{PermissionState/"denied"}}, then:
+                    <ol>
+                      <li>
+                        [=Queue a global task=] on the [=user interaction task source=] given the
+                        current realm's [=global object=] as |global| to [=reject=] |P| with a new
+                        {{DOMException}} object whose {{DOMException/name}} is {{NotAllowedError}}.
+                      </li>
+                      <li>Abort these steps.</li>
+                    </ol>
                   </li>
                   <li>
                     If [=this=].{{CaptureController/[[ForwardWheelElement]]}} is not `null`,
@@ -378,7 +392,10 @@
                       </li>
                     </ol>
                   </li>
-                  <li>[=Resolve=] |P|.</li>
+                  <li>
+                    [=Queue a global task=] on the [=user interaction task source=] given the
+                    current realm's [=global object=] as |global| to [=resolve=] |P|.
+                  </li>
                 </ol>
               </li>
               <li>Return |P|.</li>
@@ -548,13 +565,23 @@
                 [=Request permission to use=] a {{PermissionDescriptor}} with its
                 {{PermissionDescriptor/name}} member set to
                 <a>"captured-surface-control"</a>. If the result of the request is
-                {{PermissionState/"denied"}}, [=reject=] |P| with a new {{DOMException}} object
-                whose {{DOMException/name}} is {{NotAllowedError}} and abort these steps.
+                {{PermissionState/"denied"}}, then:
+                <ol>
+                  <li>
+                    [=Queue a global task=] on the [=user interaction task source=] given the
+                    current realm's [=global object=] as |global| to [=reject=] |P| with a new
+                    {{DOMException}} object whose {{DOMException/name}} is {{NotAllowedError}}.
+                  </li>
+                  <li>Abort these steps.</li>
+                </ol>
               </li>
               <li>
                 Set [=this=].{{CaptureController/[[Source]]}}'s [=zoom level=] to |targetZoomLevel|.
               </li>
-              <li>[=Resolve=] |P|.</li>
+              <li>
+                [=Queue a global task=] on the [=user interaction task source=] given the current
+                realm's [=global object=] as |global| to [=resolve=] |P|.
+              </li>
             </ol>
           </li>
           <li>Return |P|.</li>
