@@ -226,7 +226,7 @@
             <ol>
               <li>If [=this=] is not [=actively capturing=], abort these steps.</li>
               <li>Set [=this=].{{CaptureController/[[ZoomLevel]]}} to |newZoomLevel|.</li>
-              <li>[=Fire an event=] named `capturedzoomlevelchange` at [=this=].</li>
+              <li>[=Fire an event=] named `zoomlevelchange` at [=this=].</li>
             </ol>
             <div class="note">
               <p>Examples of causes include:</p>
@@ -257,7 +257,7 @@
             Promise&lt;undefined&gt; forwardWheel(HTMLElement? element);
           };
         </pre>
-        <dl data-link-for="CaptureController" data-dfn-for="CaptureController">
+        <dl data-link-for="CaptureController" data-dfn-for="CaptureController" class="methods">
           <dt><dfn>constructor</dfn></dt>
           <dd>
             <p>
