@@ -17,7 +17,8 @@
       <ul>
         <li>Read and write |capturee|'s [=zoom level=].</li>
         <li>
-          Deliver a wheel event over |capturee|'s viewport at coordinates of |capturer|'s choosing.
+          Forward gestures (such as wheel events) to |capturee|'s viewport from a target element in
+          |capturer|'s own viewport.
         </li>
       </ul>
     </section>
@@ -310,9 +311,9 @@
           <dt><dfn>forwardGestures()</dfn></dt>
           <dd>
             <p>
-              This method allows applications to automatically forward gestures such as
-              <a data-cite="uievents/#idl-wheelevent">wheel events</a>
-              from an {{HTMLElement}} to the viewport of a captured [=display surface=].
+              This method allows applications to automatically forward gestures (such as
+              <a data-cite="uievents/#idl-wheelevent">wheel events</a>) from an {{HTMLElement}} to
+              the viewport of a captured [=display surface=].
             </p>
             <p>When invoked, the user agent MUST run the following steps:</p>
             <ol>
@@ -320,31 +321,30 @@
               <li>Let |options| be the method's second argument.</li>
               <li>
                 If [=this=] is not [=actively capturing=] and |options| includes any members whose
-                value is different from `false`, return a promise [=reject|rejected=] with a
-                {{DOMException}} object whose {{DOMException/name}} attribute has the value
-                {{InvalidStateError}}.
+                value is `true`, return a promise [=reject|rejected=] with a {{DOMException}} object
+                whose {{DOMException/name}} attribute has the value {{InvalidStateError}}.
               </li>
               <li>
                 If [=this=] [=is self-capturing=] and |options| includes any members whose value is
-                different from `false`, return a promise [=reject|rejected=] with a {{DOMException}}
-                object whose {{DOMException/name}} attribute has the value {{InvalidStateError}}.
+                `true`, return a promise [=reject|rejected=] with a {{DOMException}} object whose
+                {{DOMException/name}} attribute has the value {{InvalidStateError}}.
               </li>
               <li>Let |surfaceType| be [=this=].{{CaptureController/[[DisplaySurfaceType]]}}.</li>
               <li>
                 If |surfaceType| is not a [=supported display surface type=] and |options| includes
-                any members whose value is different from `false`, return a promise
-                [=reject|rejected=] with a {{DOMException}} object whose {{DOMException/name}}
-                attribute has the value {{NotSupportedError}}.
+                any members whose value is `true`, return a promise [=reject|rejected=] with a
+                {{DOMException}} object whose {{DOMException/name}} attribute has the value
+                {{NotSupportedError}}.
               </li>
               <li>Let |P| be a new {{Promise}}.</li>
               <li>
                 Run the following steps [=in parallel=]:
                 <ol>
                   <li>
-                    If |options| includes any members whose value is different from `false`, [=get
-                    the current permission state=] of <a>"captured-surface-control"</a>. If the
-                    result is NOT {{PermissionState/"granted"}}, and the [=relevant global object=]
-                    does NOT have [=transient activation=], then:
+                    If |options| includes any members whose value is `true`, [=get the current
+                    permission state=] of <a>"captured-surface-control"</a>. If the result is NOT
+                    {{PermissionState/"granted"}}, and the [=relevant global object=] does NOT have
+                    [=transient activation=], then:
                     <ol>
                       <li>
                         [=Queue a global task=] on the [=user interaction task source=] given the
@@ -372,9 +372,9 @@
                     </div>
                   </li>
                   <li>
-                    If |options| includes any members whose value is different from `false`,
-                    [=request permission to use=] a {{PermissionDescriptor}} with its
-                    {{PermissionDescriptor/name}} member set to
+                    If |options| includes any members whose value is `true`, [=request permission to
+                    use=] a {{PermissionDescriptor}} with its {{PermissionDescriptor/name}} member
+                    set to
                     <a>"captured-surface-control"</a>. If the result of the request is
                     {{PermissionState/"denied"}}, then:
                     <ol>
@@ -387,7 +387,6 @@
                     </ol>
                   </li>
                   <li>
-                    <p>TODO: Accommodate multiple elements or check for equality with |element|.</p>
                     <p>
                       If [=this=].{{CaptureController/[[forwardGesturesElement]]}} is not `null`,
                       [=remove an event listener=] with
@@ -403,20 +402,20 @@
                   </li>
                   <li>
                     If [=this=].{{CaptureController/[[forwardGesturesElement]]}} is not `null` and
-                    |options|.{{GestureForwardingOptions/wheel}} is `true`:
+                    any of |options|' members is `true`:
                     <ol>
                       <li>
                         Set [=this=].{{CaptureController/[[forwardGesturesEventListener]]}} to an
                         [=event listener=] defined as follows:
                         <dl>
                           <dt>type</dt>
-                          <dd>`wheel`</dd>
+                          <dd>`gesture`</dd>
                           <dt>[=event listener/callback=]</dt>
                           <dd>
                             The result of creating a new Web IDL {{EventListener}} instance
                             representing a reference to a function of one argument of type {{Event}}
-                            |event|. This function executes the [=forward wheel event algorithm=]
-                            given [=this=] and |event|.
+                            |event|. This function executes the [=forward gesture algorithm=] given
+                            [=this=] and |event|.
                           </dd>
                         </dl>
                       </li>
@@ -651,10 +650,10 @@
         </ol>
       </section>
       <section>
-        <h2>Subroutine: Forward wheel event</h2>
+        <h2>Subroutine: Forward gesture</h2>
         <p>
-          The <dfn>forward wheel event algorithm</dfn> takes a {{CaptureController}} |controller|
-          and a {{WheelEvent}} |event|, and runs the following steps:
+          The <dfn>forward gesture algorithm</dfn> takes a {{CaptureController}} |controller| and an
+          {{Event}} |event|, and runs the following steps:
         </p>
         <ol>
           <li>If |controller| is not [=actively capturing=], abort these steps.</li>
@@ -741,11 +740,11 @@
         </li>
         <li>A new {{PermissionsPolicy}} called <a>"captured-surface-control"</a> is used.</li>
         <li>
-          {{CaptureController/forwardGestures()}} is designed such that only the user's scrolling
-          over an {{Element}} can trigger scrolling in the captured application. This API shape
-          ensures that the capturing application can only [=forward wheel event algorithm|forward
-          wheel events=] to the captured application at the time when the user agent dispatches the
-          trusted wheel event on the capturing application itself.
+          {{CaptureController/forwardGestures()}} is designed such that only the user's gestures
+          over an {{Element}} can trigger gesture-forwaarding to the captured application. This API
+          shape ensures that the capturing application can only [=forward gesture algorithm|forward
+          gestures=] to the captured application at the time when the user agent dispatches the
+          trusted event associated with the gesture on the capturing application itself.
         </li>
         <li>
           Setting the zoom level is gated by a requirement that is even more stringent than
@@ -770,9 +769,9 @@
         <h3>Scrolling: Limitation to specific interactions</h3>
         <p>
           The shape of {{CaptureController/forwardGestures()}} is intentionally chosen to limit the
-          capturing application's control. The application designates a specific element which, when
-          the user scrolls over it, the corresponding wheel events are forwarded to the captured
-          application.
+          capturing application's control. The application designates a specific element, and when
+          the user interacts with that element, the corresponding gestures are forwarded to the
+          captured application.
         </p>
       </section>
       <section>
