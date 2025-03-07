@@ -31,7 +31,7 @@ The answer is probably "no", but it's worth mentioning that `getSupportedZoomLev
 
 ### 2.7. Does this specification allow an origin to send data to the underlying platform?
 
-The answer is "no", but it's worth mentioning that `setZoomLevel()` allows applications to request that the user agent change zoom levels on specific tabs.
+The answer is "no", but it's worth mentioning that `increaseZoomLevel()`, `decreaseZoomLevel()` and `resetZoomLevel()` allow applications to request that the user agent change zoom levels on specific tabs.
 
 ### 2.8. Do features in this specification enable access to device sensors?
 
