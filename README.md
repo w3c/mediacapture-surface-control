@@ -40,10 +40,10 @@ previewTile.srcObject = stream;
 
 We distinguish between write-access and read-access APIs.
 
-- The write-access APIs introduced here, `forwardWheel()` and `setZoomLevel()`, are gated by a new [Permissions Policy](https://www.w3.org/TR/permissions-policy-1/#permissionspolicy) called `"captured-surface-control"`.
+- The write-access APIs introduced here, `forwardWheel()`, `increaseZoomLevel()`, `decreaseZoomLevel()` and `resetZoomLevel()`, are gated by a new [Permissions Policy](https://www.w3.org/TR/permissions-policy-1/#permissionspolicy) called `"captured-surface-control"`.
 - Our read-access APIs are innocuous and are threfore left ungated.
 
-With most browsers' interpretation of [Permissions Policy](https://www.w3.org/TR/permissions-policy-1/#permissionspolicy), the first time an origin invokes either `forwardWheel()` or `setZoomLevel()`, the browser shows a [permission prompt](https://w3c.github.io/permissions/#prompt-the-user-to-choose). How long this permission is persisted is up to the browser, with typical durations being "forever" or "for the current browsing session".
+With most browsers' interpretation of [Permissions Policy](https://www.w3.org/TR/permissions-policy-1/#permissionspolicy), the first time an origin invokes either `forwardWheel()`, `forwardWheel()`, `increaseZoomLevel()`, `decreaseZoomLevel()` or `resetZoomLevel()`, the browser shows a [permission prompt](https://w3c.github.io/permissions/#prompt-the-user-to-choose). How long this permission is persisted is up to the browser, with typical durations being "forever" or "for the current browsing session".
 
 Before displaying a permission prompt to the user, the app must solicit a user gesture. If the app wants to show zoom-in/out buttons ahead of time, then the user gesture is a given. But if the app wants to first inform the user about these new features, and provide clearer context about the ensuing permission prompt, then the app could include an onboarding experience that features a "start" button of some sort, after which it will invoke a write-access API in a way that will producie the prompt but will not cause change of state, as perceived by the user. An example is:
 
@@ -60,7 +60,7 @@ document.getElementById("startButton").onclick = async () => {
       name: "captured-surface-control",
     });
     if (hasPermission.state !== "granted") {
-      await controller.setZoomLevel(controller.getZoomLevel());
+      await controller.forwardWheel(previewTile);
     }
   } catch (e) {
     console.log(`Error: ${e}`);
@@ -107,39 +107,45 @@ To faciliate read-access and write-access to a caputred surface's zoom, we exten
 ```webidl
 partial interface CaptureController {
   sequence<long> getSupportedZoomLevels();
-  long getZoomLevel();
-  Promise<undefined> setZoomLevel(long zoomLevel);
-  attribute EventHandler oncapturedzoomlevelchange;
+  readonly attribute long? zoomLevel;
+  Promise<undefined> increaseZoomLevel();
+  Promise<undefined> decreaseZoomLevel();
+  Promise<undefined> resetZoomLevel();
+  attribute EventHandler onzoomlevelchange;
 };
 ```
 
 #### getSupportedZoomLevels()
 
-Returns a list of zoom-levels which could theoretically be set, depending on the user agent implementation and the type of surface shared. This zoom level is represented as a percentage of the "default zoom-level", which is defined as 100%. The list is guaranteed to be monotonically increasing, and is guaranteed to contain the value `100`.
+Returns a list of valid zoom-levels for the captured display surface. This zoom level is represented as a percentage of the "default zoom-level", which is defined as 100%. The list is guaranteed to be monotonically increasing, and is guaranteed to contain the value `100`. It is also guaranteed to contain the minimum and maximum values.
 
-Note that user agents may trim the list to a reasonable length. If the need arises, this function may in the future be extended to receive an argument with the maximum number of entries the application is interested in receiving.
+Note that:
+- The list `[100]` is technically valid, as the minimum/maximum values are not required to be distinct from the default value or from each other.
+- The user agents may trim the list to a reasonable length. If the need arises, this function may in the future be extended to receive an argument with the maximum number of entries the application is interested in receiving.
+- `getSupportedZoomLevels()` may only be called if `zoomLevel` is non-null; otherwise, the user agent does not have a concept of zoom level for that type of display surface, and if `getSupportedZoomLevels()` were called, an exception would be raised.
+- `getSupportedZoomLevels()` may only be called while `controller` is associated with an active capture; otherwise, the method raises an exception.
 
-#### getZoomLevel()
+#### zoomLevel
 
-Returns the current zoom-level of the captured surface.
+This read-only attribute contains the current zoom-level of the captured surface. (Or `null` if a zoom level is not defined to the display surface, which is currently the case for windows and screens.)
 
 Sample usage:
 
 ```js
-currentZoomLabel.textContent = `${controller.getZoomLevel()}%`;
+currentZoomLabel.textContent = `${controller.zoomLevel}%`;
 ```
 
 This method is not gated by a permission policy.
 
-This method is guaranteed to return a value that appears in the set of values returned by `getSupportedZoomLevels()`.
+After capture stops, reading `zoomLevel` would yield the last value it held while the capture was active. Notably, `zoomLevel` will NOT be updated after the capture session ends even if the captured surface's zoom level changes again.
 
-#### setZoomLevel(value)
+#### increasZoomLevel(), decreasZoomLevel() and resetZoomLevel()
 
-Given an integer `value` that appears in `getSupportedZoomLevels()`, sets the zoom-level of the captured surface to `value`.
+These methods are used to increase, decrease or reset the zoom level of the captured surface. (Resetting sets the value to the default - 100.)
 
-`setZoomLevel()` is subject to a permissions policy, which might involve a permission prompt. This method returns a promise. If the permission policy is in the `'granted'` state, or if it is in the `'prompt'` state and the user does grant it once prompted, the promise is resolved; otherwise, it is rejected.
+These methods are subject to a permissions policy, which might involve a permission prompt. These methods return a promise. If the permission policy is in the `'granted'` state, or if it is in the `'prompt'` state and the user does grant it once prompted, the promise is resolved; otherwise, it is rejected.
 
-One way to use this method is to present UX elements to the user:
+One way to use these methods is to present UX elements to the user:
 
 <p align="center">
   <img src="images/explainer/zoom_controls_mock.png">
@@ -148,31 +154,24 @@ One way to use this method is to present UX elements to the user:
 Code backing up these controls could look like:
 
 ```js
-const zoomIncreaseButton = document.getElementById("zoomInButton");
-zoomIncreaseButton.addEventListener("click", async (event) => {
-  const supportedZoomLevels = controller.getSupportedZoomLevels();
-  const currentZoomLevelIndex = supportedZoomLevels.indexOf(controller.getZoomLevel());
-  if (currentZoomLevelIndex >= supportedZoomLevelsz.length - 1) {
-    return;
-  }
-  const newZoomLevel = supportedZoomLevels[currentZoomLevelIndex + 1];
+zoomInButton.addEventListener("click", async (event) => {
   try {
-    await controller.setZoomLevel(newZoomLevel);
+    await controller.increaseZoomLevel();
   } catch (e) {
     console.log(`Error: ${e}`);
   }
 });
 ```
 
-#### oncapturedzoomlevelchange
+#### onzoomlevelchange
 
-Users can change the captured application's zoom-level by interacting with the user agent, the captured application, or possibly by additional means. If the capturing application is displaying any user-facing controls and UX element, such as an indicator of the current zoom-level, or buttons to increase/decrease zoom, then the capturing application will want to listen to such externally-triggered zoom-changes, and reflect them in the capturing application's own UX. The `oncapturedzoomlevelchange` event handler helps with that.
+Users can change the captured application's zoom-level by interacting with the user agent, the captured application, or possibly by additional means. If the capturing application is displaying any user-facing controls and UX element, such as an indicator of the current zoom-level, or buttons to increase/decrease zoom, then the capturing application will want to listen to such externally-triggered zoom-changes, and reflect them in the capturing application's own UX. The `onzoomlevelchange` event handler helps with that.
 
 Sample usage:
 
 ```js
-controller.addEventListener("capturedzoomlevelchange", (event) => {
-  const zoomLevel = controller.getZoomLevel();
+controller.addEventListener("zoomlevelchange", (event) => {
+  const zoomLevel = controller.zoomLevel;
 
   // Update label.
   zoomLevelLabel.textContent = `${zoomLevel}%`;
