@@ -43,9 +43,9 @@ We distinguish between write-access and read-access APIs.
 - The write-access APIs introduced here, `forwardWheel()`, `increaseZoomLevel()`, `decreaseZoomLevel()` and `resetZoomLevel()`, are gated by a new [Permissions Policy](https://www.w3.org/TR/permissions-policy-1/#permissionspolicy) called `"captured-surface-control"`.
 - Our read-access APIs are innocuous and are threfore left ungated.
 
-With most browsers' interpretation of [Permissions Policy](https://www.w3.org/TR/permissions-policy-1/#permissionspolicy), the first time an origin invokes either `forwardWheel()`, `forwardWheel()`, `increaseZoomLevel()`, `decreaseZoomLevel()` or `resetZoomLevel()`, the browser shows a [permission prompt](https://w3c.github.io/permissions/#prompt-the-user-to-choose). How long this permission is persisted is up to the browser, with typical durations being "forever" or "for the current browsing session".
+With most browsers' interpretation of [Permissions Policy](https://www.w3.org/TR/permissions-policy-1/#permissionspolicy), the first time an origin invokes either `forwardWheel()`, `increaseZoomLevel()`, `decreaseZoomLevel()` or `resetZoomLevel()`, the browser shows a [permission prompt](https://w3c.github.io/permissions/#prompt-the-user-to-choose). How long this permission is persisted is up to the browser, with typical durations being "forever" or "for the current browsing session".
 
-Before displaying a permission prompt to the user, the app must solicit a user gesture. If the app wants to show zoom-in/out buttons ahead of time, then the user gesture is a given. But if the app wants to first inform the user about these new features, and provide clearer context about the ensuing permission prompt, then the app could include an onboarding experience that features a "start" button of some sort, after which it will invoke a write-access API in a way that will producie the prompt but will not cause change of state, as perceived by the user. An example is:
+Before displaying a permission prompt to the user, the app must solicit a user gesture. If the app wants to show zoom-in/out buttons ahead of time, then the user gesture is a given. But if the app wants to first inform the user about these new features, and provide clearer context about the ensuing permission prompt, then the app could include an onboarding experience that features a "start" button of some sort, after which it will invoke a write-access API in a way that will produce the prompt but will not cause change of state, as perceived by the user. An example is:
 
 <p align="center">
   <img src="images/explainer/onboarding_mock_full_context.png">
@@ -102,7 +102,7 @@ Forwarding will also stop if the capture-session ends for whatever reason.
 
 ## Zoom controls
 
-To faciliate read-access and write-access to a caputred surface's zoom, we extend `CaptureController` as follows:
+To faciliate read-access and write-access to a captured surface's zoom, we extend `CaptureController` as follows:
 
 ```webidl
 partial interface CaptureController {
@@ -139,7 +139,7 @@ This method is not gated by a permission policy.
 
 After capture stops, reading `zoomLevel` would yield the last value it held while the capture was active. Notably, `zoomLevel` will NOT be updated after the capture session ends even if the captured surface's zoom level changes again.
 
-#### increasZoomLevel(), decreasZoomLevel() and resetZoomLevel()
+#### increaseZoomLevel(), decreaseZoomLevel() and resetZoomLevel()
 
 These methods are used to increase, decrease or reset the zoom level of the captured surface. (Resetting sets the value to the default - 100.)
 
@@ -154,7 +154,7 @@ One way to use these methods is to present UX elements to the user:
 Code backing up these controls could look like:
 
 ```js
-zoomInButton.addEventListener("click", async (event) => {
+zoomIncreaseButton.addEventListener("click", async (event) => {
   try {
     await controller.increaseZoomLevel();
   } catch (e) {
