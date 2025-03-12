@@ -17,7 +17,8 @@
       <ul>
         <li>Read and write |capturee|'s [=zoom level=].</li>
         <li>
-          Deliver a wheel event over |capturee|'s viewport at coordinates of |capturer|'s choosing.
+          Forward gestures (such as wheel events) to |capturee|'s viewport from a target element in
+          |capturer|'s own viewport.
         </li>
       </ul>
     </section>
@@ -78,9 +79,10 @@
       <div class="note">
         <p>
           The API surfaces introduced by this specification can be categorized as either read-access
-          or write-access. Note that only the write-access APIs ({{CaptureController/forwardWheel}},
-          {{CaptureController/increaseZoomLevel}}, {{CaptureController/decreaseZoomLevel}} and
-          {{CaptureController/resetZoomLevel}}) are gated by the <a>"captured-surface-control"</a>
+          or write-access. Note that only the write-access APIs
+          ({{CaptureController/forwardGestures}}, {{CaptureController/increaseZoomLevel}},
+          {{CaptureController/decreaseZoomLevel}} and {{CaptureController/resetZoomLevel}}) are
+          gated by the <a>"captured-surface-control"</a>
           permissions policy.
         </p>
       </div>
@@ -248,13 +250,31 @@
     </section>
 
     <section id="scrolling">
-      <h1>Scroll</h1>
+      <h1>Gesture-forwarding</h1>
       <section>
-        <h2>Scrolling APIs</h2>
+        <h2>Definition of GestureForwardingOptions</h2>
+        <pre class="idl">
+          dictionary GestureForwardingOptions {
+            boolean wheel = false;
+          };
+        </pre>
+        <dl data-dfn-for="GestureForwardingOptions" class="dictionary-members">
+          <dt><dfn>wheel</dfn> of type {{boolean}}, defaulting to `false`</dt>
+          <dd>
+            If `true`, indicates that the application wishes for
+            <a data-cite="uievents/#idl-wheelevent">wheel events</a> to be forwarded. If `false`,
+            indicates that the application wishes for these events to stop being forwarded.
+          </dd>
+        </dl>
+      </section>
+      <section>
+        <h2>Extensions to CaptureController</h2>
         <pre class="idl">
           partial interface CaptureController {
             constructor();
-            Promise&lt;undefined&gt; forwardWheel(HTMLElement? element);
+            Promise&lt;undefined&gt; forwardGestures(
+                HTMLElement element,
+                optional GestureForwardingOptions options = {});
           };
         </pre>
         <dl data-link-for="CaptureController" data-dfn-for="CaptureController" class="methods">
@@ -278,50 +298,57 @@
                   <td>`null`</td>
                 </tr>
                 <tr>
-                  <td><dfn>[[\ForwardWheelElement]]</dfn></td>
+                  <td><dfn>[[\forwardGesturesElement]]</dfn></td>
                   <td>`null`</td>
                 </tr>
                 <tr>
-                  <td><dfn>[[\ForwardWheelEventListener]]</dfn></td>
+                  <td><dfn>[[\forwardGesturesEventListener]]</dfn></td>
                   <td>`null`</td>
+                </tr>
+                <tr>
+                  <td><dfn>[[\forwardGesturesOptions]]</dfn></td>
+                  <td>`{}`</td>
                 </tr>
               </tbody>
             </table>
           </dd>
-          <dt><dfn>forwardWheel()</dfn></dt>
+          <dt><dfn>forwardGestures()</dfn></dt>
           <dd>
             <p>
-              This method allows applications to automatically forward
-              <a data-cite="uievents/#idl-wheelevent">wheel events</a>
-              from an {{HTMLElement}} to the viewport of a captured [=display surface=].
+              This method allows applications to automatically forward gestures (such as
+              <a data-cite="uievents/#idl-wheelevent">wheel events</a>) from an {{HTMLElement}} to
+              the viewport of a captured [=display surface=].
             </p>
             <p>When invoked, the user agent MUST run the following steps:</p>
             <ol>
+              <li>Let |element| be the method's first argument.</li>
+              <li>Let |options| be the method's second argument.</li>
               <li>
-                If [=this=] is not [=actively capturing=], return a promise [=reject|rejected=] with
-                a {{DOMException}} object whose {{DOMException/name}} attribute has the value
-                {{InvalidStateError}}.
+                If [=this=] is not [=actively capturing=] and |options| includes any members whose
+                value is `true`, return a promise [=reject|rejected=] with a {{DOMException}} object
+                whose {{DOMException/name}} attribute has the value {{InvalidStateError}}.
               </li>
               <li>
-                If [=this=] [=is self-capturing=], return a promise [=reject|rejected=] with a
-                {{DOMException}} object whose {{DOMException/name}} attribute has the value
-                {{InvalidStateError}}.
+                If [=this=] [=is self-capturing=] and |options| includes any members whose value is
+                `true`, return a promise [=reject|rejected=] with a {{DOMException}} object whose
+                {{DOMException/name}} attribute has the value {{InvalidStateError}}.
               </li>
               <li>Let |surfaceType| be [=this=].{{CaptureController/[[DisplaySurfaceType]]}}.</li>
               <li>
-                If |surfaceType| is not a [=supported display surface type=], return a promise
-                [=reject|rejected=] with a {{DOMException}} object whose {{DOMException/name}}
-                attribute has the value {{NotSupportedError}}.
+                If |surfaceType| is not a [=supported display surface type=] and |options| includes
+                any members whose value is `true`, return a promise [=reject|rejected=] with a
+                {{DOMException}} object whose {{DOMException/name}} attribute has the value
+                {{NotSupportedError}}.
               </li>
-              <li>Let |element| be the method's first argument.</li>
               <li>Let |P| be a new {{Promise}}.</li>
               <li>
                 Run the following steps [=in parallel=]:
                 <ol>
                   <li>
-                    [=Get the current permission state=] of <a>"captured-surface-control"</a>. If
-                    the result is NOT {{PermissionState/"granted"}}, and the [=relevant global
-                    object=] does NOT have [=transient activation=], then:
+                    If |options| includes any members whose value is `true`, [=get the current
+                    permission state=] of <a>"captured-surface-control"</a>. If the result is NOT
+                    {{PermissionState/"granted"}}, and the [=relevant global object=] does NOT have
+                    [=transient activation=], then:
                     <ol>
                       <li>
                         [=Queue a global task=] on the [=user interaction task source=] given the
@@ -336,16 +363,22 @@
                         This step ensures that on the one hand, permission prompts are not be shown
                         without [=transient activation=], while on the one hand, if the permission
                         is already {{PermissionState/"granted"}},
-                        {{CaptureController/forwardWheel()}} may be called immediately after
+                        {{CaptureController/forwardGestures()}} may be called immediately after
                         {{MediaDevices/getDisplayMedia()}} resolves, even if the [=transient
-                        activation=] that permitted the call to {{CaptureController/forwardWheel()}}
-                        has since expired.
+                        activation=] that permitted the call to
+                        {{CaptureController/forwardGestures()}} has since expired.
+                      </p>
+                      <p>
+                        It is always permissible to turn off gesture-forwarding. Otherwise, an
+                        application that loses this permission would not be able to turn
+                        gesture-forwarding off until it regains that permission.
                       </p>
                     </div>
                   </li>
                   <li>
-                    [=Request permission to use=] a {{PermissionDescriptor}} with its
-                    {{PermissionDescriptor/name}} member set to
+                    If |options| includes any members whose value is `true`, [=request permission to
+                    use=] a {{PermissionDescriptor}} with its {{PermissionDescriptor/name}} member
+                    set to
                     <a>"captured-surface-control"</a>. If the result of the request is
                     {{PermissionState/"denied"}}, then:
                     <ol>
@@ -358,37 +391,46 @@
                     </ol>
                   </li>
                   <li>
-                    If [=this=].{{CaptureController/[[ForwardWheelElement]]}} is not `null`,
-                    [=remove an event listener=] with
-                    [=this=].{{CaptureController/[[ForwardWheelElement]]}} as |eventTarget| and
-                    [=this=].{{CaptureController/[[ForwardWheelEventListener]]}} as |listener|.
+                    <p>
+                      If [=this=].{{CaptureController/[[forwardGesturesElement]]}} is not `null`,
+                      [=remove an event listener=] with
+                      [=this=].{{CaptureController/[[forwardGesturesElement]]}} as |eventTarget| and
+                      [=this=].{{CaptureController/[[forwardGesturesEventListener]]}} as |listener|.
+                    </p>
                   </li>
                   <li>
-                    Set [=this=].{{CaptureController/[[ForwardWheelEventListener]]}} to `null`.
+                    Set [=this=].{{CaptureController/[[forwardGesturesEventListener]]}} to `null`.
                   </li>
-                  <li>Set [=this=].{{CaptureController/[[ForwardWheelElement]]}} to |element|.</li>
                   <li>
-                    If [=this=].{{CaptureController/[[ForwardWheelElement]]}} is not `null`:
+                    Set [=this=].{{CaptureController/[[forwardGesturesElement]]}} to |element|.
+                  </li>
+                  <li>
+                    Set [=this=].{{CaptureController/[[forwardGesturesOptions]]}} to |options|.
+                  </li>
+                  <li>
+                    If [=this=].{{CaptureController/[[forwardGesturesElement]]}} is not `null` and
+                    any of |options|' members is `true`:
                     <ol>
                       <li>
-                        Set [=this=].{{CaptureController/[[ForwardWheelEventListener]]}} to an
+                        Set [=this=].{{CaptureController/[[forwardGesturesEventListener]]}} to an
                         [=event listener=] defined as follows:
                         <dl>
                           <dt>type</dt>
-                          <dd>`wheel`</dd>
+                          <dd>`gesture`</dd>
                           <dt>[=event listener/callback=]</dt>
                           <dd>
                             The result of creating a new Web IDL {{EventListener}} instance
                             representing a reference to a function of one argument of type {{Event}}
-                            |event|. This function executes the [=forward wheel event algorithm=]
-                            given [=this=] and |event|.
+                            |event|. This function executes the [=forward gesture algorithm=] given
+                            [=this=] and |event|.
                           </dd>
                         </dl>
                       </li>
                       <li>
                         [=Add an event listener=] with
-                        [=this=].{{CaptureController/[[ForwardWheelElement]]}} as |eventTarget| and
-                        [=this=].{{CaptureController/[[ForwardWheelEventListener]]}} as |listener|.
+                        [=this=].{{CaptureController/[[forwardGesturesElement]]}} as |eventTarget|
+                        and [=this=].{{CaptureController/[[forwardGesturesEventListener]]}} as
+                        |listener|.
                       </li>
                     </ol>
                   </li>
@@ -615,16 +657,17 @@
         </ol>
       </section>
       <section>
-        <h2>Subroutine: Forward wheel event</h2>
+        <h2>Subroutine: Forward gesture</h2>
         <p>
-          The <dfn>forward wheel event algorithm</dfn> takes a {{CaptureController}} |controller|
-          and a {{WheelEvent}} |event|, and runs the following steps:
+          The <dfn>forward gesture algorithm</dfn> takes a {{CaptureController}} |controller| and an
+          {{Event}} |event|, and runs the following steps:
         </p>
         <ol>
           <li>If |controller| is not [=actively capturing=], abort these steps.</li>
-          <li>If [=this=] [=is self-capturing=], abort these steps.</li>
+          <li>If |controller| [=is self-capturing=], abort these steps.</li>
           <li>Let |surfaceType| be |controller|.{{CaptureController/[[DisplaySurfaceType]]}}.</li>
           <li>If |surfaceType| is not a [=supported display surface type=], abort these steps.</li>
+          <li>Let |options| be |controller|.{{CaptureController/[[forwardGesturesOptions]]}}.</li>
           <li>
             Run the following steps [=in parallel=]:
             <ol>
@@ -634,19 +677,28 @@
               </li>
               <li>If |event|.{{Event/isTrusted}} is `false`, abort these steps.</li>
               <li>
-                Let [|scaledX|, |scaledY|] be the result of the [=scale element coordinates
-                algorithm=] on [|event|.{{MouseEvent/offsetX}}, |event|.{{MouseEvent/offsetY}}] and
-                [=this=].{{CaptureController/[[ForwardWheelElement]]}}.
-              </li>
-              <li>
-                [=Queue a global task=] on the [=user interaction task source=] of
-                |controller|.[[\Source]]'s current realm, given that
-                <a data-cite="HTML#concept-realm-global">realm's global object</a>, to [=fire an
-                event=] named `"wheel"` using {{WheelEvent}} with the {{MouseEvent//x}} attribute
-                initialized to |scaledX|, the {{MouseEvent//y}} attribute initialized to |scaledY|,
-                the {{WheelEvent/deltaX}} attribute initialized to |event|.|deltaX| and the
-                {{WheelEvent/deltaY}} attribute initialized to |event|.|deltaY|, at the
-                <a data-cite="uievents#topmost-event-target">topmost event target</a>.
+                <p>
+                  If |event|.{{Event/type}} is `'wheel'` and
+                  |options|.{{GestureForwardingOptions/wheel}} is `true`:
+                </p>
+                <ol>
+                  <li>
+                    Let [|scaledX|, |scaledY|] be the result of the [=scale element coordinates
+                    algorithm=] on [|event|.{{MouseEvent/offsetX}}, |event|.{{MouseEvent/offsetY}}]
+                    and [=this=].{{CaptureController/[[forwardGesturesElement]]}}.
+                  </li>
+                  <li>
+                    [=Queue a global task=] on the [=user interaction task source=] of
+                    |controller|.[[\Source]]'s current realm, given that
+                    <a data-cite="HTML#concept-realm-global">realm's global object</a>, to [=fire an
+                    event=] named `"wheel"` using {{WheelEvent}} with the {{MouseEvent//x}}
+                    attribute initialized to |scaledX|, the {{MouseEvent//y}} attribute initialized
+                    to |scaledY|, the {{WheelEvent/deltaX}} attribute initialized to
+                    |event|.|deltaX| and the {{WheelEvent/deltaY}} attribute initialized to
+                    |event|.|deltaY|, at the
+                    <a data-cite="uievents#topmost-event-target">topmost event target</a>.
+                  </li>
+                </ol>
               </li>
             </ol>
           </li>
@@ -663,14 +715,14 @@
             Let |scaleFactorX| be
             <code
               >(|x| /
-              |controller|.{{CaptureController/[[ForwardWheelElement]]}}.{{Element/getBoundingClientRect()}}.{{DOMRect/width}})</code
+              |controller|.{{CaptureController/[[forwardGesturesElement]]}}.{{Element/getBoundingClientRect()}}.{{DOMRect/width}})</code
             >.
           </li>
           <li>
             Let |scaleFactorX| be
             <code
               >(|x| /
-              |controller|.{{CaptureController/[[ForwardWheelElement]]}}.{{Element/getBoundingClientRect()}}.{{DOMRect/height}})</code
+              |controller|.{{CaptureController/[[forwardGesturesElement]]}}.{{Element/getBoundingClientRect()}}.{{DOMRect/height}})</code
             >.
           </li>
           <li>
@@ -705,11 +757,11 @@
         </li>
         <li>A new {{PermissionsPolicy}} called <a>"captured-surface-control"</a> is used.</li>
         <li>
-          {{CaptureController/forwardWheel()}} is designed such that only the user's scrolling over
-          an {{Element}} can trigger scrolling in the captured application. This API shape ensures
-          that the capturing application can only [=forward wheel event algorithm|forward wheel
-          events=] to the captured application at the time when the user agent dispatches the
-          trusted wheel event on the capturing application itself.
+          {{CaptureController/forwardGestures()}} is designed such that only the user's gestures
+          over an {{Element}} can trigger gesture-forwaarding to the captured application. This API
+          shape ensures that the capturing application can only [=forward gesture algorithm|forward
+          gestures=] to the captured application at the time when the user agent dispatches the
+          trusted event associated with the gesture on the capturing application itself.
         </li>
         <li>
           Setting the zoom level is gated by a requirement that is even more stringent than
@@ -733,10 +785,10 @@
       <section>
         <h3>Scrolling: Limitation to specific interactions</h3>
         <p>
-          The shape of {{CaptureController/forwardWheel()}} is intentionally chosen to limit the
-          capturing application's control. The application designates a specific element which, when
-          the user scrolls over it, the corresponding wheel events are forwarded to the captured
-          application.
+          The shape of {{CaptureController/forwardGestures()}} is intentionally chosen to limit the
+          capturing application's control. The application designates a specific element, and when
+          the user interacts with that element, the corresponding gestures are forwarded to the
+          captured application.
         </p>
       </section>
       <section>
@@ -744,14 +796,14 @@
         <p>
           This specification does not limit the type of {{Element}} for which either
           {{CaptureController/increaseZoomLevel()}}, {{CaptureController/decreaseZoomLevel()}},
-          {{CaptureController/resetZoomLevel()}} or {{CaptureController/forwardWheel()}} work. Such
-          a limitation would accomplish nothing, because malicious applications could always overlay
-          transparent permitted {{Element}} types on top of visible non-permitted {{Element}}s,
-          thereby bypassing this restriction.
+          {{CaptureController/resetZoomLevel()}} or {{CaptureController/forwardGestures()}} work.
+          Such a limitation would accomplish nothing, because malicious applications could always
+          overlay transparent permitted {{Element}} types on top of visible non-permitted
+          {{Element}}s, thereby bypassing this restriction.
         </p>
         <p>
           The limitation of interaction types is sufficient. This is accomplished by
-          {{CaptureController/forwardWheel()}} through its shape, and by
+          {{CaptureController/forwardGestures()}} through its shape, and by
           {{CaptureController/increaseZoomLevel()}}, {{CaptureController/decreaseZoomLevel()}} and
           {{CaptureController/resetZoomLevel()}} through their gating on
           <a data-cite="DOM#dom-event-type">event types</a>.
