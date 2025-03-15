@@ -632,7 +632,23 @@
                 [=Get the current permission state=] of <a>"captured-surface-control"</a>. If the
                 result is NOT {{PermissionState/"granted"}}, abort these steps.
               </li>
-              <li>If |event|.{{Event/isTrusted}} is `false`, abort these steps.</li>
+              <li>
+                <p>If |event|.{{Event/isTrusted}} is `false`, abort these steps.</p>
+                <div class="note">
+                  <p>
+                    It is recommended that implementations of this specification take some measures
+                    to ensure that the behavior they produce matches the intentions of both the end
+                    user and the Web developer.
+                  </p>
+                  <p>
+                    One possible such measure would be to ensure that the
+                    [=this=].{{CaptureController/[[ForwardWheelElement]]}}'s
+                    <a data-cite="cssom-view-1#dom-element-getboundingclientrect">bounding box</a>
+                    is aligned with a rectange where a reasonably recent frame taken from
+                    {{CaptureController/[[Source]]}} is drawn.
+                  </p>
+                </div>
+              </li>
               <li>
                 Let [|scaledX|, |scaledY|] be the result of the [=scale element coordinates
                 algorithm=] on [|event|.{{MouseEvent/offsetX}}, |event|.{{MouseEvent/offsetY}}] and
