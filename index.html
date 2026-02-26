@@ -24,7 +24,7 @@
 
     <section id="sotd"></section>
 
-    <section id="background">
+    <section id="background" class="informative">
       <h1>Background</h1>
       <p>
         Nearly all video-conferencing Web applications offer their users the ability to share
@@ -57,10 +57,7 @@
         </li>
       </ol>
       <p>
-        It bears mentioning that
-        <a href="https://wicg.github.io/document-picture-in-picture/"
-          >Document Picture-in-Picture</a
-        >
+        It bears mentioning that [[DOCUMENT-PICTURE-IN-PICTURE]]
         goes a long way towards addressing some of these issues. However, it not always a suitable
         solution, as not all use cases are adequately addressed by a floating window which will
         often be small, which obscures arbitrary other content on the screen, and whose size and
@@ -128,7 +125,7 @@
           following <a data-cite="DOM#dom-event-type">event types</a>:
         </p>
         <ul>
-          <li><a data-cite="uievents#event-type-click">"click"</a></li>
+          <li>"[=click=]"</li>
           <li><a data-cite="uievents#event-type-input">"input"</a></li>
         </ul>
       </section>
@@ -292,7 +289,7 @@
           <dd>
             <p>
               This method allows applications to automatically forward
-              <a data-cite="uievents/#idl-wheelevent">wheel events</a>
+              <a data-cite="pointerevents#events-wheelevents">wheel events</a>
               from an {{HTMLElement}} to the viewport of a captured [=display surface=].
             </p>
             <p>When invoked, the user agent MUST run the following steps:</p>
@@ -646,7 +643,7 @@
                 initialized to |scaledX|, the {{MouseEvent//y}} attribute initialized to |scaledY|,
                 the {{WheelEvent/deltaX}} attribute initialized to |event|.|deltaX| and the
                 {{WheelEvent/deltaY}} attribute initialized to |event|.|deltaY|, at the
-                <a data-cite="uievents#topmost-event-target">topmost event target</a>.
+                [=topmost event target=].
               </li>
             </ol>
           </li>
@@ -726,7 +723,7 @@
           <a data-cite="DOM#dom-event-type">event types</a> - the [=permitted event types for
           zoom-setting=]. These are events dispatched directly by the user agent, triggered by user
           interaction. This specification intentionally excludes from this set such events as
-          <a data-cite="uievents#mousemove">"mousemove"</a>, which users are liable to trigger
+          "[=mousemove=]", which users are liable to trigger
           inadvertently.
         </p>
       </section>

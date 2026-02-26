@@ -22,7 +22,7 @@ var respecConfig = {
     "mediacapture-streams",
     "webidl",
     "screen-capture",
-    "uievents",
+    "pointerevents",
     "cssom-view",
     "geometry-1",
   ],
