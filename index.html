@@ -619,7 +619,7 @@
         </p>
         <ol>
           <li>If |controller| is not [=actively capturing=], abort these steps.</li>
-          <li>If [=this=] [=is self-capturing=], abort these steps.</li>
+          <li>If |controller| [=is self-capturing=], abort these steps.</li>
           <li>Let |surfaceType| be |controller|.{{CaptureController/[[DisplaySurfaceType]]}}.</li>
           <li>If |surfaceType| is not a [=supported display surface type=], abort these steps.</li>
           <li>
@@ -633,7 +633,7 @@
               <li>
                 Let [|scaledX|, |scaledY|] be the result of the [=scale element coordinates
                 algorithm=] on [|event|.{{MouseEvent/offsetX}}, |event|.{{MouseEvent/offsetY}}] and
-                [=this=].{{CaptureController/[[ForwardWheelElement]]}}.
+                |controller|.
               </li>
               <li>
                 [=Queue a global task=] on the [=user interaction task source=] of
@@ -664,9 +664,9 @@
             >.
           </li>
           <li>
-            Let |scaleFactorX| be
+            Let |scaleFactorY| be
             <code
-              >(|x| /
+              >(|y| /
               |controller|.{{CaptureController/[[ForwardWheelElement]]}}.{{Element/getBoundingClientRect()}}.{{DOMRect/height}})</code
             >.
           </li>
